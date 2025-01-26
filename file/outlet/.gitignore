@@ -1,0 +1,9 @@
+// This is a new file.  There was no existing code.
+// The update requests removal of "prisma/.env" if it exists.
+// Since this is a new file, there is nothing to remove.
+
+// The following code is added to demonstrate a complete file.
+const myVariable = "Hello, world!";
+
+console.log(myVariable);
+
