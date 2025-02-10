@@ -13,10 +13,8 @@ export default function Home() {
     <div className="flex flex-col">
       {/* Navigation Bar */}
       <Navigation />
-
       {/* Hero Section */}
       <AnimatedHero />
-
       {/* Services Section */}
       <motion.section
         initial={{ opacity: 0, y: 50 }}
@@ -50,7 +48,6 @@ export default function Home() {
           </div>
         </div>
       </motion.section>
-
       {/* Why Choose Section */}
       <motion.section
         initial={{ opacity: 0 }}
@@ -59,7 +56,7 @@ export default function Home() {
         className="py-12 sm:py-20 bg-[#3E3636] text-white"
       >
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-2xl sm:text-3xl font-bold mb-6 sm:mb-8">Why Choose GAS GAS BY?</h2>
+          <h2 className="text-2xl sm:text-3xl font-bold mb-6 sm:mb-8">Why Choose GAS BY GAS?</h2>
           <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-6 sm:gap-8">
             <div>
               <h3 className="text-xl font-semibold mb-4">Reliability</h3>
@@ -76,10 +73,8 @@ export default function Home() {
           </div>
         </div>
       </motion.section>
-
       {/* Contact Section */}
       <ContactSection />
-
       {/* Footer */}
       <Footer />
     </div>

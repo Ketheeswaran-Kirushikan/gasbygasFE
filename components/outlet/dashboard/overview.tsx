@@ -1,91 +1,85 @@
-'use client'
+"use client";
 
-import { useApp } from '@/contexts/app-context'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { ArrowDown, ArrowUp, Package, Truck } from 'lucide-react'
-import { useTranslation } from '@/hooks/use-translation'
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/outlet/ui/card";
+import { ArrowDown, ArrowUp, Package, Truck } from "lucide-react";
+import { useTranslation } from "@/hooks/outlet/use-translation";
 
-export function DashboardOverview() {
-  const { state } = useApp()
-  const { t } = useTranslation()
-  const pendingRequests = state.requests.filter(r => r.status === 'PENDING').length
-  const deliveriesToday = state.requests.filter(r => r.status === 'DELIVERED').length
-  const lowStockItems = state.stock.filter(s => s.quantity <= s.threshold).length
+export function DashboardOverview({ gasRequests, gasStock }) {
+  const { t } = useTranslation();
+
+
+  // Calculate total revenue (sum of prices for completed payment requests)
+  const totalRevenue = gasRequests
+    ?.filter((request) => request.paymentStatus === "completed")
+    .reduce((sum, request) => sum + request.price, 0) || 0;
+
+  // Count gas requests with status "delivered"
+  const deliveriesToday = gasRequests?.filter((request) => request.status === "delivered").length || 0;
+
+  // Count gas requests with status "approved" (pending orders)
+  const pendingOrders = gasRequests?.filter((request) => request.status === "approved").length || 0;
+
+  // Calculate total stock count
+  const totalGasStock = gasStock?.reduce((total, stockItem) => total + stockItem.quantity, 0) || 0;
+
+  // Low Stock Alerts (Placeholder for future feature)
+  const lowStockItems = gasStock?.filter((item) => item.quantity === 0 || item.quantity < 5).length || 0;
 
   return (
-    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
+      {/* Pending Orders Card */}
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">{t('Pending Orders')}</CardTitle>
+          <CardTitle className="text-sm font-medium">{t("Pending Orders")}</CardTitle>
           <Package className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold">{pendingRequests}</div>
-          <p className="text-xs text-muted-foreground">
-            <span className="text-red-500 inline-flex items-center">
-              <ArrowDown className="h-4 w-4 mr-1" /> 3.2%
-            </span>{' '}
-            {t('from last month')}
-          </p>
+          <div className="text-2xl font-bold">{pendingOrders}</div>
         </CardContent>
       </Card>
+
+      {/* Deliveries Today Card */}
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">{t('Deliveries Today')}</CardTitle>
+          <CardTitle className="text-sm font-medium">{t("Deliveries Today")}</CardTitle>
           <Truck className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold">{deliveriesToday}</div>
-          <p className="text-xs text-muted-foreground">
-            <span className="text-green-500 inline-flex items-center">
-              <ArrowUp className="h-4 w-4 mr-1" /> 12%
-            </span>{' '}
-            {t('from yesterday')}
-          </p>
         </CardContent>
       </Card>
+
+      {/* Low Stock Alerts Card */}
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">{t('Low Stock Alerts')}</CardTitle>
+          <CardTitle className="text-sm font-medium">{t("Low Stock Alerts")}</CardTitle>
           <Package className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold">{lowStockItems}</div>
-          <p className="text-xs text-muted-foreground">
-            <span className="text-red-500 inline-flex items-center">
-              <ArrowUp className="h-4 w-4 mr-1" /> 1
-            </span>{' '}
-            {t('from last hour')}
-          </p>
         </CardContent>
       </Card>
+
+      {/* Total Gas Stock Card */}
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">{t('Total Revenue')}</CardTitle>
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth="2"
-            className="h-4 w-4 text-muted-foreground"
-          >
-            <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
-          </svg>
+          <CardTitle className="text-sm font-medium">{t("Total Gas Stock")}</CardTitle>
+          <Package className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold">$45,231.89</div>
-          <p className="text-xs text-muted-foreground">
-            <span className="text-green-500 inline-flex items-center">
-              <ArrowUp className="h-4 w-4 mr-1" /> 5.4%
-            </span>{' '}
-            {t('from last month')}
-          </p>
+          <div className="text-2xl font-bold">{totalGasStock}</div>
+        </CardContent>
+      </Card>
+
+      {/* Total Revenue Card */}
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardTitle className="text-sm font-medium">{t("Total Revenue")}</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="text-2xl font-bold">Rs. {totalRevenue.toLocaleString()}</div>
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }
-

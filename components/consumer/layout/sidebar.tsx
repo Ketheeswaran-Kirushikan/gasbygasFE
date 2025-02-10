@@ -2,14 +2,12 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { useParams, usePathname, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import {
   Home,
-  BarChart2,
-  FuelIcon as GasPump,
   ClipboardList,
   Bell,
   Settings,
@@ -32,6 +30,7 @@ import { TranslatedText } from "@/components/consumer/ui/translated-text";
 import { useSelector, useDispatch } from "react-redux";
 import { RootState } from "@/app/Redux/store/store";
 import { getUserByIdThunk } from "@/app/Redux/features/userSlice";
+import { logout } from "@/app/Redux/features/authSlice";
 
 export function Sidebar() {
   const { translate } = useLanguage();
@@ -43,27 +42,38 @@ export function Sidebar() {
   const [showLogoutConfirmation, setShowLogoutConfirmation] = useState(false);
   const sidebarRef = useRef<HTMLDivElement | null>(null);
 
+  // Get `id` from URL parameters
+  const { id } = useParams();
+
   // Fetch user data from Redux
   const user = useSelector((state: RootState) => state.user.user);
   const isLoading = useSelector((state: RootState) => state.user.isLoading);
 
+  // Determine the auth token for logout
+  const token = localStorage.getItem("authToken");
+
   // Fetch user details on mount
   useEffect(() => {
-    const userId = localStorage.getItem("currentUserId");
-    if (userId) {
-      dispatch(getUserByIdThunk(userId));
+    if (id) {
+      dispatch(getUserByIdThunk(id));
     }
-  }, [dispatch]);
+  }, [dispatch, id]);
 
-  // Navigation items with dynamic paths
-  const navigation = [
-    { name: "Home", href: `/consumers/${user?.id}`, icon: Home },
-    { name: "Overview", href: `/consumers/${user?.id}/overview`, icon: BarChart2 },
-    { name: "Gas Request", href: `/consumers/${user?.id}/gas-request`, icon: GasPump },
-    { name: "My Requests", href: `/consumers/${user?.id}/my-requests`, icon: ClipboardList },
-    { name: "Notifications", href: `/consumers/${user?.id}/notifications`, icon: Bell },
-    { name: "Settings", href: `/consumers/${user?.id}/settings`, icon: Settings },
-  ];
+  // Determine the name to display based on userType
+  const displayName =
+    user?.userType === "businessIndustry"
+      ? user?.companyName
+      : user?.firstName;
+
+  // Navigation items with dynamic paths using `id`
+  const navigation = id
+    ? [
+        { name: "Home", href: `/consumers/${id}`, icon: Home },
+        { name: "My Requests", href: `/consumers/${id}/my-requests`, icon: ClipboardList },
+        { name: "Notifications", href: `/consumers/${id}/notification`, icon: Bell },
+        { name: "Settings", href: `/consumers/${id}/setting`, icon: Settings },
+      ]
+    : [];
 
   // Close sidebar on outside click
   useEffect(() => {
@@ -83,6 +93,17 @@ export function Sidebar() {
     };
   }, [isOpen]);
 
+  const handleLogout = async () => {
+    try {
+      await dispatch(logout(token)).unwrap();
+      localStorage.removeItem("currentUserId");
+      localStorage.removeItem("authToken"); // Remove token from local storage
+      router.push("/"); // Navigate to the landing page
+    } catch (error) {
+      console.error("Logout failed:", error);
+    }
+  };
+
   return (
     <>
       {/* Sidebar */}
@@ -101,7 +122,7 @@ export function Sidebar() {
             ) : user ? (
               <div className="flex items-center gap-3 text-white">
                 <User className="h-6 w-6 text-gray-400" />
-                <p className="text-lg font-bold">{user.firstName}</p>
+                <p className="text-lg font-bold">{displayName || "Guest"}</p>
               </div>
             ) : (
               <p className="text-gray-400">Guest</p>
@@ -175,7 +196,7 @@ export function Sidebar() {
                     <TranslatedText text="Confirm Logout" />
                   </DialogTitle>
                   <DialogDescription>
-                    <TranslatedText text="Are you sure you want to log out? You will be redirected to the login page." />
+                    <TranslatedText text="Are you sure you want to log out? You will be redirected to the home page." />
                   </DialogDescription>
                 </DialogHeader>
                 <div className="flex justify-end space-x-2">
@@ -187,11 +208,7 @@ export function Sidebar() {
                   </Button>
                   <Button
                     variant="destructive"
-                    onClick={() => {
-                      localStorage.removeItem("currentUserId");
-                      router.push("/login");
-                      setShowLogoutConfirmation(false);
-                    }}
+                    onClick={handleLogout}
                   >
                     <TranslatedText text="Logout" />
                   </Button>

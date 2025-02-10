@@ -1,215 +1,361 @@
-'use client'
+"use client";
 
-import { useState, useEffect } from 'react'
-import { useApp } from '@/contexts/app-context'
-import { Button } from '@/components/ui/button'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Input } from '@/components/ui/input'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
-import { Checkbox } from '@/components/ui/checkbox'
-import { StockReportView } from './stock-report-view'
-import { Download, Edit, Trash, Eye } from 'lucide-react'
-import { EditReportForm } from './edit-report-form'
-import { useTranslation } from '@/hooks/use-translation'
+import { useState, useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { getAllUsersThunk } from "@/app/Redux/features/userSlice";
+import { getAllGasRequestsByOutletThunk } from "@/app/Redux/features/gasRequestSlice";
+import { getOutletByIdThunk } from "@/app/Redux/features/outletSlice";
+import { RootState, AppDispatch } from "@/app/Redux/store/store";
+import { useParams } from "next/navigation";
 
-type ReportType = 'stock' | 'deliveries' | 'users'
+import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { toast } from "react-toastify";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
+import "react-toastify/dist/ReactToastify.css";
+import { Download, Trash, Eye } from "lucide-react";
+import { useTranslation } from "@/hooks/outlet/use-translation";
+
+type ReportType = "stock" | "Gas Request" | "users";
 
 interface Report {
-  id: string
-  type: ReportType
-  startDate: string
-  endDate: string
-  generatedAt: string
+  id: string;
+  type: ReportType;
+  startDate: string;
+  endDate: string;
+  generatedAt: string;
 }
 
 export function ReportGeneration() {
-  const { state } = useApp()
-  const { t } = useTranslation()
-  const [reportType, setReportType] = useState<ReportType>('stock')
-  const [startDate, setStartDate] = useState('')
-  const [endDate, setEndDate] = useState('')
-  const [reports, setReports] = useState<Report[]>([])
-  const [selectedReports, setSelectedReports] = useState<Set<string>>(new Set())
-  const [viewingReport, setViewingReport] = useState<Report | null>(null)
-  const [editingReport, setEditingReport] = useState<Report | null>(null)
+  const dispatch: AppDispatch = useDispatch();
+  const { t } = useTranslation();
+  const { id: outletId } = useParams(); // Get Outlet ID from URL
+
+  // Fetch data from Redux state
+  const { users } = useSelector((state: RootState) => state.user);
+  const { gasRequests } = useSelector((state: RootState) => state.gasRequests);
+  const { outlet } = useSelector((state: RootState) => state.outlets);
+
+  // State variables
+  const [reportType, setReportType] = useState<ReportType>("stock");
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
+  const [reports, setReports] = useState<Report[]>([]);
+  const [viewingReport, setViewingReport] = useState<Report | null>(null);
+
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const reportsPerPage = 5;
 
   useEffect(() => {
-    // In a real app, this would fetch reports from the backend
-    const mockReports: Report[] = [
-      { id: '1', type: 'stock', startDate: '2023-01-01', endDate: '2023-01-31', generatedAt: '2023-02-01' },
-      { id: '2', type: 'deliveries', startDate: '2023-02-01', endDate: '2023-02-28', generatedAt: '2023-03-01' },
-      { id: '3', type: 'users', startDate: '2023-03-01', endDate: '2023-03-31', generatedAt: '2023-04-01' },
-    ]
-    setReports(mockReports)
-  }, [])
+    dispatch(getAllUsersThunk());
+    dispatch(getAllGasRequestsByOutletThunk(outletId));
+    dispatch(getOutletByIdThunk(outletId));
+  }, [dispatch, outletId]);
+
+  // Format date function (YYYY-MM-DD)
+  const formatDate = (date: string) =>
+    new Date(date).toISOString().split("T")[0];
+
+  // Filter data based on createdAt field
+  const filterDataByDate = (data: any[], start: string, end: string) => {
+    return data.filter((item) => {
+      const createdAt = formatDate(item.createdAt);
+      return createdAt >= start && createdAt <= end;
+    });
+  };
 
   const generateReport = () => {
-    // In a real application, this would generate a report based on the selected type and date range
+    if (!startDate || !endDate) {
+      toast.error("Please select start and end dates!", {
+        position: "top-right",
+        autoClose: 3000,
+      });
+      return;
+    }
+
+    let generatedData: any[] = [];
+
+    switch (reportType) {
+      case "users":
+        if (users?.allUsers) {
+          console.log("All Users:", users.allUsers); // Debugging Log
+
+          // ✅ Only select users with `userType` as "consumer" (Exclude "businessIndustry")
+          generatedData = filterDataByDate(
+            users.allUsers.filter((user) => {
+              const userType = user?.userType?.trim().toLowerCase();
+              console.log("Checking userType:", userType); // Debugging Log
+              return userType === "consumer"; // ✅ Exclude "businessIndustry"
+            }),
+            startDate,
+            endDate
+          );
+
+          console.log("Filtered Consumers:", generatedData); // Debugging Log
+        }
+        break;
+
+      case "Gas Request":
+        generatedData = filterDataByDate(gasRequests || [], startDate, endDate);
+        break;
+
+      case "stock":
+        generatedData = filterDataByDate(
+          outlet?.gasStock || [],
+          startDate,
+          endDate
+        );
+        break;
+
+      default:
+        break;
+    }
+
+    if (generatedData.length === 0) {
+      toast.error("No data available for the selected report type!", {
+        position: "top-right",
+        autoClose: 3000,
+      });
+      return;
+    }
+
     const newReport: Report = {
       id: Date.now().toString(),
       type: reportType,
       startDate,
       endDate,
-      generatedAt: new Date().toISOString().split('T')[0],
-    }
-    setReports([newReport, ...reports])
-  }
+      generatedAt: new Date().toISOString().split("T")[0],
+    };
 
-  const handleSelectAll = (checked: boolean) => {
-    if (checked) {
-      setSelectedReports(new Set(reports.map(r => r.id)))
-    } else {
-      setSelectedReports(new Set())
-    }
-  }
-
-  const handleSelectReport = (id: string, checked: boolean) => {
-    setSelectedReports(prev => {
-      const newSet = new Set(prev)
-      if (checked) {
-        newSet.add(id)
-      } else {
-        newSet.delete(id)
-      }
-      return newSet
-    })
-  }
-
-  const handleDeleteSelected = () => {
-    setReports(reports.filter(r => !selectedReports.has(r.id)))
-    setSelectedReports(new Set())
-  }
+    setReports([newReport, ...reports]);
+    toast.success("Report generated successfully!", {
+      position: "top-right",
+      autoClose: 3000,
+    });
+  };
 
   const handleDeleteReport = (id: string) => {
-    setReports(reports.filter(r => r.id !== id))
-    setSelectedReports(prev => {
-      const newSet = new Set(prev)
-      newSet.delete(id)
-      return newSet
-    })
-  }
+    setReports(reports.filter((r) => r.id !== id));
+    toast.success("Report deleted successfully!", {
+      position: "top-right",
+      autoClose: 3000,
+    });
+  };
 
-  const handleDownloadSelected = () => {
-    // In a real app, this would download the selected reports
-    console.log('Downloading selected reports:', Array.from(selectedReports))
-  }
+  const handleDownloadReport = (report: Report) => {
+    let data: any[] = [];
+    let columns: string[] = [];
 
-  const handleDownloadReport = (id: string) => {
-    // In a real app, this would download the specific report
-    console.log('Downloading report:', id)
-  }
+    switch (report.type) {
+      case "users":
+        // ✅ Filter only "consumer" users
+        data = filterDataByDate(
+          (users?.allUsers || []).filter(
+            (user) => user?.userType?.trim().toLowerCase() === "consumer"
+          ),
+          report.startDate,
+          report.endDate
+        ).map((user) => [
+          user.firstName || "-",
+          user.lastName || "-",
+          user.email?.replace(/\s+/g, " ").trim() || "-", // Clean email formatting
+          user.phoneNumber || "-",
+          formatDate(user.createdAt),
+        ]);
 
-  const handleEditReport = (report: Report) => {
-    setEditingReport(report)
-  }
+        columns = [
+          "First Name",
+          "Last Name",
+          "Email",
+          "Phone Number",
+          "Created At",
+        ];
+        break;
 
-  const handleViewReport = (report: Report) => {
-    setViewingReport(report)
-  }
+      case "Gas Request":
+        data = filterDataByDate(
+          gasRequests || [],
+          report.startDate,
+          report.endDate
+        ).map((request) => [
+          request.referenceNumber || "-",
+          request.gasType || "-",
+          request.quantity || "-",
+          request.price || "-",
+          request.status || "-",
+          formatDate(request.createdAt),
+        ]);
 
-  const handleSaveEditedReport = (updatedReport: Report) => {
-    setReports(reports.map(r => r.id === updatedReport.id ? updatedReport : r))
-    setEditingReport(null)
-  }
+        columns = [
+          "Reference Number",
+          "Gas Type",
+          "Quantity",
+          "Price",
+          "Status",
+          "Created At",
+        ];
+        break;
+
+      case "stock":
+        data = filterDataByDate(
+          outlet?.gasStock || [],
+          report.startDate,
+          report.endDate
+        ).map((stock) => [
+          stock.id || "-",
+          stock.gasType || "-",
+          stock.quantity || "-",
+          formatDate(stock.updatedAt),
+        ]);
+
+        columns = [
+          "Stock ID",
+          "Gas Type",
+          "Available Quantity",
+          "Last Updated",
+        ];
+        break;
+
+      default:
+        toast.error("Invalid report type!");
+        return;
+    }
+
+    if (data.length === 0) {
+      toast.error("No data available for this report!", {
+        position: "top-right",
+        autoClose: 3000,
+      });
+      return;
+    }
+
+    // ✅ Create PDF document
+    const doc = new jsPDF();
+    doc.text(`Report: ${report.type}`, 14, 10);
+
+    // ✅ Generate table in PDF with smaller font size
+    autoTable(doc, {
+      startY: 20,
+      head: [columns],
+      body: data,
+      styles: { fontSize: 8 }, // 🔥 Reduce font size
+      columnStyles: {
+        2: { cellWidth: 60 }, // Set wider column for email
+      },
+    });
+
+    doc.save(`${report.type}_Report_${report.generatedAt}.pdf`);
+    toast.success("PDF Report Downloaded Successfully!", {
+      position: "top-right",
+      autoClose: 3000,
+    });
+};
+
+
+  // Pagination Logic
+  const indexOfLastReport = currentPage * reportsPerPage;
+  const indexOfFirstReport = indexOfLastReport - reportsPerPage;
+  const currentReports = reports.slice(indexOfFirstReport, indexOfLastReport);
 
   return (
     <div className="space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle>{t('Generate New Report')}</CardTitle>
+          <CardTitle>{t("Generate New Report")}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
-            <Select value={reportType} onValueChange={(value) => setReportType(value as ReportType)}>
+            <Select
+              value={reportType}
+              onValueChange={(value) => setReportType(value as ReportType)}
+            >
               <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder={t('Select report type')} />
+                <SelectValue placeholder={t("Select report type")} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="stock">{t('Stock Report')}</SelectItem>
-                <SelectItem value="deliveries">{t('Deliveries Report')}</SelectItem>
-                <SelectItem value="users">{t('Users Report')}</SelectItem>
+                <SelectItem value="stock">{t("Stock Report")}</SelectItem>
+                <SelectItem value="Gas Request">
+                  {t("Gas Request Report")}
+                </SelectItem>
+                <SelectItem value="users">{t("Users Report")}</SelectItem>
               </SelectContent>
             </Select>
             <Input
               type="date"
               value={startDate}
               onChange={(e) => setStartDate(e.target.value)}
-              placeholder={t('Start Date')}
             />
             <Input
               type="date"
               value={endDate}
               onChange={(e) => setEndDate(e.target.value)}
-              placeholder={t('End Date')}
             />
-            <Button onClick={generateReport}>{t('Generate Report')}</Button>
+            <Button onClick={generateReport}>{t("Generate Report")}</Button>
           </div>
         </CardContent>
       </Card>
 
       <Card>
         <CardHeader>
-          <CardTitle>{t('Report History')}</CardTitle>
+          <CardTitle>{t("Report History")}</CardTitle>
         </CardHeader>
         <CardContent>
-          {selectedReports.size > 0 && (
-            <div className="mb-4 flex space-x-2">
-              <Button variant="outline" onClick={handleDownloadSelected}>
-                <Download className="mr-2 h-4 w-4" />
-                {t('Download Selected')} ({selectedReports.size})
-              </Button>
-              <Button variant="destructive" onClick={handleDeleteSelected}>
-                <Trash className="mr-2 h-4 w-4" />
-                {t('Delete Selected')} ({selectedReports.size})
-              </Button>
-            </div>
-          )}
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="w-[50px]">
-                  <Checkbox
-                    checked={selectedReports.size === reports.length && reports.length > 0}
-                    onCheckedChange={handleSelectAll}
-                  />
-                </TableHead>
-                <TableHead>{t('Type')}</TableHead>
-                <TableHead>{t('Start Date')}</TableHead>
-                <TableHead>{t('End Date')}</TableHead>
-                <TableHead>{t('Generated At')}</TableHead>
-                <TableHead>{t('Actions')}</TableHead>
+                <TableHead>{t("Type")}</TableHead>
+                <TableHead>{t("Start Date")}</TableHead>
+                <TableHead>{t("End Date")}</TableHead>
+                <TableHead>{t("Generated At")}</TableHead>
+                <TableHead>{t("Actions")}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {reports.map((report) => (
+              {currentReports.map((report) => (
                 <TableRow key={report.id}>
-                  <TableCell>
-                    <Checkbox
-                      checked={selectedReports.has(report.id)}
-                      onCheckedChange={(checked) => handleSelectReport(report.id, checked as boolean)}
-                    />
-                  </TableCell>
                   <TableCell>{report.type}</TableCell>
                   <TableCell>{report.startDate}</TableCell>
                   <TableCell>{report.endDate}</TableCell>
                   <TableCell>{report.generatedAt}</TableCell>
                   <TableCell>
-                    <div className="flex space-x-2">
-                      <Button variant="ghost" size="sm" onClick={() => handleViewReport(report)}>
-                        <Eye className="h-4 w-4" />
-                      </Button>
-                      <Button variant="ghost" size="sm" onClick={() => handleEditReport(report)}>
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                      <Button variant="ghost" size="sm" onClick={() => handleDownloadReport(report.id)}>
-                        <Download className="h-4 w-4" />
-                      </Button>
-                      <Button variant="ghost" size="sm" onClick={() => handleDeleteReport(report.id)}>
-                        <Trash className="h-4 w-4" />
-                      </Button>
-                    </div>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleDownloadReport(report)}
+                    >
+                      <Download className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleDeleteReport(report.id)}
+                    >
+                      <Trash className="h-4 w-4" />
+                    </Button>
                   </TableCell>
                 </TableRow>
               ))}
@@ -217,33 +363,6 @@ export function ReportGeneration() {
           </Table>
         </CardContent>
       </Card>
-
-      <Dialog open={!!viewingReport} onOpenChange={(open) => !open && setViewingReport(null)}>
-        <DialogContent className="max-w-4xl">
-          <DialogHeader>
-            <DialogTitle>{t('Report View')}</DialogTitle>
-          </DialogHeader>
-          {viewingReport && viewingReport.type === 'stock' && (
-            <StockReportView report={viewingReport} />
-          )}
-          {/* Add other report type views here */}
-        </DialogContent>
-      </Dialog>
-      <Dialog open={!!editingReport} onOpenChange={(open) => !open && setEditingReport(null)}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>{t('Edit Report')}</DialogTitle>
-          </DialogHeader>
-          {editingReport && (
-            <EditReportForm
-              report={editingReport}
-              onSave={handleSaveEditedReport}
-              onCancel={() => setEditingReport(null)}
-            />
-          )}
-        </DialogContent>
-      </Dialog>
     </div>
-  )
+  );
 }
-

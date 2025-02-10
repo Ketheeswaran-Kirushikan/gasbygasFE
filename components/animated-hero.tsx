@@ -19,7 +19,7 @@ export function AnimatedHero() {
     <section className="bg-black text-white py-20">
       <div className="container mx-auto text-center">
         <h1 className="text-4xl md:text-6xl font-bold mb-6">
-          GAS GAS BY: Your{" "}
+          GAS BY GAS: Your{" "}
           <motion.span
             key={index}
             initial={{ opacity: 0, y: 20 }}

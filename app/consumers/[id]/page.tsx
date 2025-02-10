@@ -1,5 +1,4 @@
 "use client";
-
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { getAllGasRequestsByUserThunk } from "@/app/Redux/features/gasRequestSlice";
@@ -16,8 +15,6 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { TranslatedText } from "@/components/consumer/ui/translated-text";
-
-// Component to display stats
 function StatCard({
   title,
   value,
@@ -41,8 +38,6 @@ function StatCard({
     </Card>
   );
 }
-
-// Modal to view gas request details
 function ViewGasRequestModal({
   isOpen,
   onClose,
@@ -91,8 +86,6 @@ function ViewGasRequestModal({
     </Dialog>
   );
 }
-
-// Component to display recent requests
 function RecentRequests({
   requests,
   onRequestClick,
@@ -106,7 +99,6 @@ function RecentRequests({
         new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
     )
     .slice(0, 3);
-
   return (
     <Card>
       <CardHeader className="bg-gray-100 p-4 rounded-t-lg">
@@ -163,7 +155,6 @@ function RecentRequests({
     </Card>
   );
 }
-
 export default function ConsumerDashboard() {
   const dispatch = useDispatch();
   const { id } = useParams(); // Get user ID from the route params

@@ -164,7 +164,6 @@ const gasRequestSlice = createSlice({
       // Get All Gas Requests by Outlet
       .addCase(getAllGasRequestsByOutletThunk.pending, (state) => {
         state.loading = true;
-        state.error = null;
       })
       .addCase(getAllGasRequestsByOutletThunk.fulfilled, (state, action) => {
         state.loading = false;
@@ -172,7 +171,6 @@ const gasRequestSlice = createSlice({
       })
       .addCase(getAllGasRequestsByOutletThunk.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload;
       })
 
        // Get all gas requests by user - pending

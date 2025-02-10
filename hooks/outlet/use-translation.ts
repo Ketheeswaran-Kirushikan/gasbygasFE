@@ -1,7 +1,7 @@
 'use client'
 
-import { useApp } from '@/contexts/app-context'
-import { translate, Language, TranslationKey } from '@/lib/translations'
+import { useApp } from '@/contexts/outlet/app-context'
+import { translate, Language, TranslationKey } from '@/lib/outlet/translations'
 
 export function useTranslation() {
   const { state, dispatch } = useApp()

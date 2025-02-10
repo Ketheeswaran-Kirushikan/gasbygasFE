@@ -1,14 +1,14 @@
 'use client'
 
-import { useApp } from '@/contexts/app-context'
-import { updateSettings } from '@/lib/actions'
+import { useApp } from '@/contexts/outlet/app-context'
+import { updateSettings } from '@/lib/outlet/actions'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Switch } from '@/components/ui/switch'
-import { useTranslation } from '@/hooks/use-translation'
+import { useTranslation } from '@/hooks/outlet/use-translation'
 
-export function GeneralSettings() {
+export function GeneralSettings({outlet}) {
   const { state, dispatch } = useApp()
   const { t, setLanguage } = useTranslation()
 

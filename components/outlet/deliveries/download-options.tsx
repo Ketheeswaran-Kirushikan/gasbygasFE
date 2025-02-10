@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { useTranslation } from '@/hooks/use-translation'
+import { useTranslation } from '@/hooks/outlet/use-translation'
 
 interface DownloadOptionsProps {
   isOpen: boolean

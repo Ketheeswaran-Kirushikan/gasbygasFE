@@ -1,8 +1,8 @@
 'use client'
 
 import { useState, useRef } from 'react'
-import { useApp } from '@/contexts/app-context'
-import { useTranslation } from '@/hooks/use-translation'
+import { useApp } from '@/contexts/outlet/app-context'
+import { useTranslation } from '@/hooks/outlet/use-translation'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
@@ -11,7 +11,7 @@ import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useToast } from '@/components/ui/use-toast'
-import { User, UserRole } from '@/types'
+import { User, UserRole } from '@/Types/outlet/index'
 
 export function ProfilePage() {
   const { state, dispatch } = useApp()

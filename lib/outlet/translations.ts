@@ -886,6 +886,7 @@ export const translations: Translations = {
 };
 
 export function translate(key: TranslationKey, language: Language): string {
-  return translations[language][key] || key;
+  const translationSet = translations[language] || translations['en']; // Default to English if language is missing
+  return translationSet[key] || key; // Return key itself if translation is missing
 }
 

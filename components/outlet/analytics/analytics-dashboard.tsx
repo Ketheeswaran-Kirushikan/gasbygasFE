@@ -1,58 +1,91 @@
-'use client'
+"use client";
 
-import { useState } from 'react'
-import { useApp } from '@/contexts/app-context'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Button } from '@/components/ui/button'
-import { DatePickerWithRange } from '@/components/ui/date-picker-with-range'
-import { 
-  Bar, 
-  BarChart, 
-  Line, 
-  LineChart, 
-  Pie, 
-  PieChart, 
-  ResponsiveContainer, 
-  XAxis, 
-  YAxis, 
-  Tooltip, 
-  Legend 
-} from 'recharts'
-import { DatabaseGraphGenerator } from './database-graph-generator'
-import { useTranslation } from '@/hooks/use-translation'
+import { useState, useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { getAllUsersThunk } from "@/app/Redux/features/userSlice";
+import { getAllGasRequestsByOutletThunk } from "@/app/Redux/features/gasRequestSlice";
+import { getOutletByIdThunk } from "@/app/Redux/features/outletSlice";
+import { RootState, AppDispatch } from "@/app/Redux/store/store";
+import { useParams } from "next/navigation";
 
-const MOCK_SALES_DATA = [
-  { month: 'Jan', domestic: 4000, industrial: 2400, commercial: 2400 },
-  { month: 'Feb', domestic: 3000, industrial: 1398, commercial: 2210 },
-  { month: 'Mar', domestic: 2000, industrial: 9800, commercial: 2290 },
-  { month: 'Apr', domestic: 2780, industrial: 3908, commercial: 2000 },
-  { month: 'May', domestic: 1890, industrial: 4800, commercial: 2181 },
-  { month: 'Jun', domestic: 2390, industrial: 3800, commercial: 2500 },
-  { month: 'Jul', domestic: 3490, industrial: 4300, commercial: 2100 },
-]
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/outlet/ui/card";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/outlet/ui/select";
+import { Button } from "@/components/outlet/ui/button";
+import {
+  BarChart,
+  Bar,
+  LineChart,
+  Line,
+  PieChart,
+  Pie,
+  ResponsiveContainer,
+  XAxis,
+  YAxis,
+  Tooltip,
+  Legend,
+} from "recharts";
+import { DatabaseGraphGenerator } from "./database-graph-generator";
+import { useTranslation } from "@/hooks/outlet/use-translation";
 
 export function AnalyticsDashboard() {
-  const { state } = useApp()
-  const { t } = useTranslation()
-  const [selectedTimeRange, setSelectedTimeRange] = useState('1M')
-  const [selectedGraphType, setSelectedGraphType] = useState('bar')
-  const [databaseGraphs, setDatabaseGraphs] = useState<JSX.Element[]>([])
+  const dispatch: AppDispatch = useDispatch();
+  const { t } = useTranslation();
+  const { id: outletId } = useParams();
 
-  const stockData = state.stock.map(item => ({
-    name: item.cylinderType,
-    value: item.quantity
-  }))
+  // Fetch data from Redux state
+  const { users } = useSelector((state: RootState) => state.user);
+  const { gasRequests } = useSelector((state: RootState) => state.gasRequests);
+  const { outlet } = useSelector((state: RootState) => state.outlets);
 
-  const deliveryData = [
-    { name: 'Pending', value: state.requests.filter(r => r.status === 'PENDING').length },
-    { name: 'Confirmed', value: state.requests.filter(r => r.status === 'CONFIRMED').length },
-    { name: 'Delivered', value: state.requests.filter(r => r.status === 'DELIVERED').length },
-  ]
+  const [selectedGraphType, setSelectedGraphType] = useState("bar");
+  const [databaseGraphs, setDatabaseGraphs] = useState<JSX.Element[]>([]);
 
-  const renderGraph = (type: string, data: any[], dataKey: string = 'value') => {
+  useEffect(() => {
+    dispatch(getAllUsersThunk());
+    dispatch(getAllGasRequestsByOutletThunk(outletId));
+    dispatch(getOutletByIdThunk(outletId));
+  }, [dispatch, outletId]);
+
+  console.log("Gas Requests:", gasRequests);
+  console.log("Outlet Data:", outlet);
+
+  // ✅ Process Gas Request Status Data
+  const gasRequestStatusData = gasRequests?.length
+    ? [
+        { name: "Pending", value: gasRequests.filter((req) => req.status === "pending").length },
+        { name: "Approved", value: gasRequests.filter((req) => req.status === "approved").length },
+        { name: "Process", value: gasRequests.filter((req) => req.status === "process").length },
+        { name: "Delivered", value: gasRequests.filter((req) => req.status === "Delivered").length },
+        { name: "Rejected", value: gasRequests.filter((req) => req.status === "Rejected").length },
+      ]
+    : [];
+
+  // ✅ Process Stock Data from Outlet (Fix)
+  const stockData =
+    outlet?.outlet?.gasStock?.length > 0
+      ? outlet?.outlet?.gasStock.map((stock) => ({
+          name: `${stock.gasType} (${stock.weight}kg)`,
+          value: stock.quantity?.$numberInt || stock.quantity?.$numberDouble || stock.quantity,
+        }))
+      : [];
+
+  // ✅ Process Sales Data from Gas Requests
+  const salesData = gasRequests?.length
+    ? gasRequests.reduce((acc, request) => {
+        const month = new Date(request.createdAt).toLocaleString("default", { month: "short" });
+        const existingMonth = acc.find((entry) => entry.month === month);
+        if (existingMonth) {
+          existingMonth[request.gasType] = (existingMonth[request.gasType] || 0) + request.quantity;
+        } else {
+          acc.push({ month, [request.gasType]: request.quantity });
+        }
+        return acc;
+      }, [])
+    : [];
+
+  const renderGraph = (type: string, data: any[], dataKey: string = "value") => {
     switch (type) {
-      case 'bar':
+      case "bar":
         return (
           <ResponsiveContainer width="100%" height={300}>
             <BarChart data={data}>
@@ -63,8 +96,8 @@ export function AnalyticsDashboard() {
               <Bar dataKey={dataKey} fill="#8884d8" />
             </BarChart>
           </ResponsiveContainer>
-        )
-      case 'line':
+        );
+      case "line":
         return (
           <ResponsiveContainer width="100%" height={300}>
             <LineChart data={data}>
@@ -75,8 +108,8 @@ export function AnalyticsDashboard() {
               <Line type="monotone" dataKey={dataKey} stroke="#8884d8" />
             </LineChart>
           </ResponsiveContainer>
-        )
-      case 'pie':
+        );
+      case "pie":
         return (
           <ResponsiveContainer width="100%" height={300}>
             <PieChart>
@@ -84,74 +117,59 @@ export function AnalyticsDashboard() {
               <Tooltip />
             </PieChart>
           </ResponsiveContainer>
-        )
+        );
       default:
-        return null
+        return null;
     }
-  }
+  };
 
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-semibold">{t('Analytics Dashboard')}</h1>
-        <div className="flex space-x-2">
-          <Select value={selectedTimeRange} onValueChange={setSelectedTimeRange}>
-            <SelectTrigger className="w-[100px]">
-              <SelectValue placeholder={t('Time Range')} />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="1W">{t('1 Week')}</SelectItem>
-              <SelectItem value="1M">{t('1 Month')}</SelectItem>
-              <SelectItem value="3M">{t('3 Months')}</SelectItem>
-              <SelectItem value="1Y">{t('1 Year')}</SelectItem>
-            </SelectContent>
-          </Select>
-          <Select value={selectedGraphType} onValueChange={setSelectedGraphType}>
-            <SelectTrigger className="w-[100px]">
-              <SelectValue placeholder={t('Graph Type')} />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="bar">{t('Bar')}</SelectItem>
-              <SelectItem value="line">{t('Line')}</SelectItem>
-              <SelectItem value="pie">{t('Pie')}</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
+        <h1 className="text-2xl font-semibold">{t("Analytics Dashboard")}</h1>
+        <Select value={selectedGraphType} onValueChange={setSelectedGraphType}>
+          <SelectTrigger className="w-[120px]">
+            <SelectValue placeholder={t("Graph Type")} />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="bar">{t("Bar")}</SelectItem>
+            <SelectItem value="line">{t("Line")}</SelectItem>
+            <SelectItem value="pie">{t("Pie")}</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
 
       <div className="grid gap-6 md:grid-cols-2">
         <Card>
           <CardHeader>
-            <CardTitle>{t('Stock Overview')}</CardTitle>
+            <CardTitle>{t("Stock Overview")}</CardTitle>
           </CardHeader>
-          <CardContent>
-            {renderGraph(selectedGraphType, stockData)}
-          </CardContent>
+          <CardContent>{renderGraph(selectedGraphType, stockData)}</CardContent>
         </Card>
 
         <Card>
           <CardHeader>
-            <CardTitle>{t('Delivery Status')}</CardTitle>
+            <CardTitle>{t("Gas Request Status")}</CardTitle>
           </CardHeader>
-          <CardContent>
-            {renderGraph(selectedGraphType, deliveryData)}
-          </CardContent>
+          <CardContent>{renderGraph(selectedGraphType, gasRequestStatusData)}</CardContent>
         </Card>
 
         <Card>
           <CardHeader>
-            <CardTitle>{t('Sales by Gas Type')}</CardTitle>
+            <CardTitle>{t("Sales by Gas Type")}</CardTitle>
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={MOCK_SALES_DATA}>
+              <BarChart data={salesData}>
                 <XAxis dataKey="month" />
                 <YAxis />
                 <Tooltip />
                 <Legend />
-                <Bar dataKey="domestic" fill="#8884d8" />
-                <Bar dataKey="industrial" fill="#82ca9d" />
-                <Bar dataKey="commercial" fill="#ffc658" />
+                {Object.keys(salesData[0] || {})
+                  .filter((key) => key !== "month")
+                  .map((gasType) => (
+                    <Bar key={gasType} dataKey={gasType} fill={gasType === "Domestic" ? "#8884d8" : gasType === "Industrial" ? "#82ca9d" : "#ffc658"} />
+                  ))}
               </BarChart>
             </ResponsiveContainer>
           </CardContent>
@@ -170,6 +188,5 @@ export function AnalyticsDashboard() {
         </div>
       )}
     </div>
-  )
+  );
 }
-

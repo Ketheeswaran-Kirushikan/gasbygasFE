@@ -1,8 +1,8 @@
 'use client'
 
 import { useState } from 'react'
-import { useApp } from '@/contexts/app-context'
-import { updateSettings } from '@/lib/actions'
+import { useApp } from '@/contexts/outlet/app-context'
+import { updateSettings } from '@/lib/outlet/actions'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
@@ -10,11 +10,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { useToast } from '@/components/ui/use-toast'
-import { useTranslation } from '@/hooks/use-translation'
 
-export function NotificationSettings() {
+export function NotificationSettings({outlet}) {
   const { state, dispatch } = useApp()
-  const { t } = useTranslation()
   const { toast } = useToast()
   const [localSettings, setLocalSettings] = useState({
     emailNotifications: state.settings.emailNotifications,
@@ -33,15 +31,15 @@ export function NotificationSettings() {
       const updatedSettings = await updateSettings('1', localSettings)
       dispatch({ type: 'UPDATE_SETTINGS', payload: updatedSettings })
       toast({
-        title: t('Settings Updated'),
-        description: t('Your notification settings have been successfully updated.'),
+        title: 'Settings Updated',
+        description: 'Your notification settings have been successfully updated.',
         duration: 3000,
       })
     } catch (error) {
       console.error('Failed to update settings:', error)
       toast({
-        title: t('Error'),
-        description: t('Failed to update settings. Please try again.'),
+        title: 'Error',
+        description: 'Failed to update settings. Please try again.',
         variant: 'destructive',
         duration: 3000,
       })
@@ -51,11 +49,11 @@ export function NotificationSettings() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>{t('Notification Settings')}</CardTitle>
+        <CardTitle>Notification Settings</CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
         <div className="flex items-center justify-between">
-          <Label htmlFor="email-notifications">{t('Email Notifications')}</Label>
+          <Label htmlFor="email-notifications">Email Notifications</Label>
           <Switch
             id="email-notifications"
             checked={localSettings.emailNotifications}
@@ -63,7 +61,7 @@ export function NotificationSettings() {
           />
         </div>
         <div className="flex items-center justify-between">
-          <Label htmlFor="stock-alerts">{t('Stock Alerts')}</Label>
+          <Label htmlFor="stock-alerts">Stock Alerts</Label>
           <Switch
             id="stock-alerts"
             checked={localSettings.stockAlerts}
@@ -71,7 +69,7 @@ export function NotificationSettings() {
           />
         </div>
         <div className="flex items-center justify-between">
-          <Label htmlFor="delivery-updates">{t('Delivery Updates')}</Label>
+          <Label htmlFor="delivery-updates">Delivery Updates</Label>
           <Switch
             id="delivery-updates"
             checked={localSettings.deliveryUpdates}
@@ -79,23 +77,23 @@ export function NotificationSettings() {
           />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="notification-frequency">{t('Notification Frequency')}</Label>
+          <Label htmlFor="notification-frequency">Notification Frequency</Label>
           <Select
             value={localSettings.notificationFrequency}
             onValueChange={(value) => handleUpdateSettings('notificationFrequency', value)}
           >
             <SelectTrigger id="notification-frequency">
-              <SelectValue placeholder={t('Select frequency')} />
+              <SelectValue placeholder="Select frequency" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="realtime">{t('Real-time')}</SelectItem>
-              <SelectItem value="daily">{t('Daily')}</SelectItem>
-              <SelectItem value="weekly">{t('Weekly')}</SelectItem>
+              <SelectItem value="realtime">Real-time</SelectItem>
+              <SelectItem value="daily">Daily</SelectItem>
+              <SelectItem value="weekly">Weekly</SelectItem>
             </SelectContent>
           </Select>
         </div>
         <div className="space-y-2">
-          <Label htmlFor="low-stock-threshold">{t('Low Stock Threshold (%)')}</Label>
+          <Label htmlFor="low-stock-threshold">Low Stock Threshold (%)</Label>
           <Input
             id="low-stock-threshold"
             type="number"
@@ -106,10 +104,9 @@ export function NotificationSettings() {
           />
         </div>
         <Button onClick={handleSaveSettings} className="w-full">
-          {t('Save Notification Settings')}
+          Save Notification Settings
         </Button>
       </CardContent>
     </Card>
   )
 }
-

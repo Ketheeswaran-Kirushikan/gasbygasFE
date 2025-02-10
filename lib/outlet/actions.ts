@@ -2,8 +2,8 @@
 
 import { revalidatePath } from 'next/cache'
 import { Store } from './store'
-import { Request, RequestStatus, CustomerType, GasType, GasWeight } from '@/types'
-import { UserRole } from '@/types'
+import { Request, RequestStatus, CustomerType, GasType, GasWeight } from '@/Types/outlet/index'
+import { UserRole } from '@/Types/outlet/index'
 
 export async function createRequest(requestData: Partial<Request>) {
   const request = await Store.createRequest({

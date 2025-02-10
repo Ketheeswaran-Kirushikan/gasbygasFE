@@ -13,7 +13,6 @@ import { useState } from "react";
 import { useDispatch } from "react-redux";
 import { createUserThunk } from "@/app/Redux/features/userSlice";
 import { toast } from "react-toastify";
-
 export function SignupModal({
   isOpen,
   onClose,
@@ -24,7 +23,6 @@ export function SignupModal({
   onLoginOpen: () => void;
 }) {
   const dispatch = useDispatch();
-
   const initialConsumerForm = {
     firstName: "",
     lastName: "",
@@ -101,8 +99,7 @@ export function SignupModal({
       setConsumerForm(initialConsumerForm);
       setBusinessForm(initialBusinessForm);
       onClose();
-    } catch (error) {
-    }
+    } catch (error) {}
   };
 
   return (
@@ -142,7 +139,9 @@ export function SignupModal({
               <div className="flex justify-between mb-4 border-b border-[#3E3636]">
                 <button
                   className={`flex-1 text-center py-2 ${
-                    tab === "consumer" ? "text-[#D72323] border-b-2 border-[#D72323]" : "text-[#F5EDED]"
+                    tab === "consumer"
+                      ? "text-[#D72323] border-b-2 border-[#D72323]"
+                      : "text-[#F5EDED]"
                   }`}
                   onClick={() => setTab("consumer")}
                 >

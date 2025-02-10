@@ -1,231 +1,214 @@
-'use client'
+"use client";
 
-import { useState } from 'react'
-import { useForm, Controller } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
-import * as z from 'zod'
-import { Request, CustomerType, GasType, GasWeight, RequestStatus } from '@/types'
-import { Input } from '@/components/ui/input'
-import { Button } from '@/components/ui/button'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Label } from '@/components/ui/label'
-import { AlertCircle, CheckCircle2 } from 'lucide-react'
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import { useTranslation } from '@/hooks/use-translation'
-
-const baseSchema = z.object({
-  customerType: z.nativeEnum(CustomerType),
-  status: z.nativeEnum(RequestStatus),
-})
-
-const consumerSchema = baseSchema.extend({
-  customerType: z.literal(CustomerType.CONSUMER),
-  gasType: z.enum([GasType.DOMESTIC, GasType.COMMERCIAL]),
-  gasWeight: z.nativeEnum(GasWeight),
-  quantity: z.number().min(1, 'Quantity must be at least 1'),
-})
-
-const businessSchema = baseSchema.extend({
-  customerType: z.literal(CustomerType.BUSINESS),
-  gasType: z.literal(GasType.INDUSTRIAL),
-  gasWeight: z.nativeEnum(GasWeight),
-  quantity: z.number().min(1, 'Quantity must be at least 1'),
-  poDocumentUrl: z.string().optional(),
-})
-
-const schema = z.discriminatedUnion('customerType', [consumerSchema, businessSchema])
+import { useState, useEffect } from "react";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
+import { DialogClose } from "@/components/ui/dialog";
+import { useDispatch, useSelector } from "react-redux";
+import { getAllUsersThunk } from "@/app/Redux/features/userSlice";
+import { RootState } from "@/app/Redux/store/store";
+import { getOutletByIdThunk } from "@/app/Redux/features/outletSlice";
+import { createGasRequestThunk } from "@/app/Redux/features/gasRequestSlice";
+import { toast } from "react-toastify";
+import { useParams } from "next/navigation";
 
 interface DeliveryRequestFormProps {
-  onSubmit: (request: Partial<Request>) => void
-  onCancel: () => void
-  initialData?: Request
+  onCancel: () => void;
 }
 
-export function DeliveryRequestForm({ onSubmit, onCancel, initialData }: DeliveryRequestFormProps) {
-  const { t } = useTranslation()
-  const [customerType, setCustomerType] = useState<CustomerType>(
-    initialData?.customerType || CustomerType.CONSUMER
-  )
+export function DeliveryRequestForm({ onCancel }: DeliveryRequestFormProps) {
+  const dispatch = useDispatch();
+  const { users } = useSelector((state: RootState) => state.user);
+  const { outlet } = useSelector((state: RootState) => state.outlets);
+  const { id: outletId } = useParams();
 
-  const { control, handleSubmit, formState: { errors }, watch, setValue } = useForm<z.infer<typeof schema>>({
-    resolver: zodResolver(schema),
-    defaultValues: initialData || {
-      customerType: CustomerType.CONSUMER,
-      status: RequestStatus.PENDING,
-      gasType: GasType.DOMESTIC,
-      gasWeight: GasWeight.FIVE_KG,
-      quantity: 1,
+  // 🛠️ Form States
+  const [gasType, setGasType] = useState("");
+  const [gasWeight, setGasWeight] = useState(0);
+  const [quantity, setQuantity] = useState(1);
+  const [userDetails, setUserDetails] = useState("");
+  const [paymentOption, setPaymentOption] = useState("");
+  const [handoverEmptyCylinder, setHandoverEmptyCylinder] = useState(false);
+  const [totalPrice, setTotalPrice] = useState(0);
+
+  useEffect(() => {
+    dispatch(getAllUsersThunk());
+    dispatch(getOutletByIdThunk(outletId));
+  }, [dispatch, outletId]);
+
+  useEffect(() => {
+    if (outlet?.outlet?.gasStock) {
+      const selectedGas = outlet.outlet.gasStock.find(
+        (gas) => gas.gasType === gasType && gas.weight === gasWeight
+      );
+      if (selectedGas) {
+        setTotalPrice(selectedGas.individualPrice * quantity);
+      }
     }
-  })
+  }, [gasType, gasWeight, quantity, outlet]);
 
-  const watchCustomerType = watch('customerType')
-  const watchGasType = watch('gasType')
+  // 🛠️ Handle Submit Request
+  const handleFormSubmit = async (e: any) => {
+    e.preventDefault();
 
-  const handleFormSubmit = (data: z.infer<typeof schema>) => {
-    onSubmit({
-      ...data,
-      tokenId: initialData?.tokenId || `TKN${Date.now()}`,
-      userId: initialData?.userId || 'current-user-id',
-      outletId: initialData?.outletId || 'current-outlet-id',
-      createdAt: initialData?.createdAt || new Date().toISOString(),
-    })
-  }
-
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0]
-    if (file) {
-      // In a real app, you would upload the file to a server and get a URL back
-      // For this example, we'll just use a placeholder URL
-      setValue('poDocumentUrl', URL.createObjectURL(file))
+    if (!gasType || !gasWeight || !quantity || !userDetails || !paymentOption) {
+      toast.error("Please fill in all required fields!");
+      return;
     }
-  }
+
+    const requestData = {
+      gasType,
+      gasWeight,
+      quantity,
+      userDetails,
+      paymentOption,
+      handoverEmptyCylinder,
+      price: totalPrice,
+      outletDetails: outletId,
+    };
+
+    try {
+      console.log("Submitting Request Data:", requestData);
+      await dispatch(createGasRequestThunk(requestData)).unwrap();
+      onCancel();
+    } catch (error) {
+      console.error("Request submission failed:", error);
+    }
+  };
 
   return (
-    <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6">
+    <form onSubmit={handleFormSubmit} className="space-y-6">
       <div className="space-y-4">
+        {/* User Selection */}
         <div className="space-y-2">
-          <Label>Customer Type</Label>
-          <Controller
-            name="customerType"
-            control={control}
-            render={({ field }) => (
-              <Select
-                onValueChange={(value) => {
-                  field.onChange(value)
-                  setCustomerType(value as CustomerType)
-                }}
-                value={field.value}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select customer type" />
-                </SelectTrigger>
-                <SelectContent>
-                  {Object.values(CustomerType).map((type) => (
+          <Label>Select User</Label>
+          <Select onValueChange={setUserDetails} value={userDetails}>
+            <SelectTrigger>
+              <SelectValue placeholder="Select a user" />
+            </SelectTrigger>
+            <SelectContent>
+              {users.allUsers?.length > 0 ? (
+                users.allUsers
+                  .filter((user) => user.NIC) // ✅ Ensure NIC exists
+                  .map((user) => (
+                    <SelectItem key={user._id} value={user._id}>
+                      {user.firstName} - {user.NIC}
+                    </SelectItem>
+                  ))
+              ) : (
+                <SelectItem disabled>No users found</SelectItem>
+              )}
+            </SelectContent>
+          </Select>
+        </div>
+
+        {/* Gas Type */}
+        <div className="space-y-2">
+          <Label>Gas Type</Label>
+          <Select onValueChange={setGasType} value={gasType}>
+            <SelectTrigger>
+              <SelectValue placeholder="Select gas type" />
+            </SelectTrigger>
+            <SelectContent>
+              {outlet?.outlet?.gasStock ? (
+                [...new Set(outlet.outlet.gasStock.map((gas) => gas.gasType))].map(
+                  (type) => (
                     <SelectItem key={type} value={type}>
                       {type}
                     </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            )}
-          />
-          {errors.customerType && (
-            <p className="text-red-500 text-sm">{errors.customerType.message}</p>
-          )}
+                  )
+                )
+              ) : (
+                <SelectItem disabled>No gas types found</SelectItem>
+              )}
+            </SelectContent>
+          </Select>
         </div>
 
-        <div className="space-y-2">
-          <Label>Gas Type</Label>
-          <Controller
-            name="gasType"
-            control={control}
-            render={({ field }) => (
-              <Select onValueChange={field.onChange} value={field.value}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select gas type" />
-                </SelectTrigger>
-                <SelectContent>
-                  {watchCustomerType === CustomerType.CONSUMER
-                    ? [GasType.DOMESTIC, GasType.COMMERCIAL].map((type) => (
-                        <SelectItem key={type} value={type}>
-                          {type}
-                        </SelectItem>
-                      ))
-                    : [GasType.INDUSTRIAL].map((type) => (
-                        <SelectItem key={type} value={type}>
-                          {type}
-                        </SelectItem>
-                      ))}
-                </SelectContent>
-              </Select>
-            )}
-          />
-          {errors.gasType && (
-            <p className="text-red-500 text-sm">{errors.gasType.message}</p>
-          )}
-        </div>
-
+        {/* Gas Weight */}
         <div className="space-y-2">
           <Label>Gas Weight</Label>
-          <Controller
-            name="gasWeight"
-            control={control}
-            render={({ field }) => (
-              <Select onValueChange={field.onChange} value={field.value}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select gas weight" />
-                </SelectTrigger>
-                <SelectContent>
-                  {Object.values(GasWeight).map((weight) => (
-                    <SelectItem key={weight} value={weight}>
-                      {weight}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            )}
-          />
-          {errors.gasWeight && (
-            <p className="text-red-500 text-sm">{errors.gasWeight.message}</p>
-          )}
+          <Select onValueChange={(value) => setGasWeight(Number(value))} value={gasWeight}>
+            <SelectTrigger>
+              <SelectValue placeholder="Select gas weight" />
+            </SelectTrigger>
+            <SelectContent>
+              {outlet?.outlet?.gasStock
+                ?.filter((gas) => gas.gasType === gasType)
+                .map((gas) => (
+                  <SelectItem key={gas.weight} value={gas.weight}>
+                    {gas.weight} KG
+                  </SelectItem>
+                ))}
+            </SelectContent>
+          </Select>
         </div>
 
+        {/* Quantity */}
         <div className="space-y-2">
           <Label>Quantity Needed</Label>
-          <Controller
-            name="quantity"
-            control={control}
-            render={({ field }) => (
-              <Input type="number" {...field} onChange={(e) => field.onChange(parseInt(e.target.value))} />
-            )}
+          <Input
+            type="number"
+            min="1"
+            value={quantity}
+            onChange={(e) => setQuantity(Number(e.target.value))}
           />
-          {errors.quantity && (
-            <p className="text-red-500 text-sm">{errors.quantity.message}</p>
-          )}
         </div>
 
-        {watchCustomerType === CustomerType.BUSINESS && (
-          <div className="space-y-2">
-            <Label>Upload PO/Document (Optional)</Label>
-            <Input type="file" onChange={handleFileChange} />
-          </div>
-        )}
-
+        {/* Payment Option */}
         <div className="space-y-2">
-          <Label>Status</Label>
-          <Controller
-            name="status"
-            control={control}
-            render={({ field }) => (
-              <Select onValueChange={field.onChange} value={field.value}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select status" />
-                </SelectTrigger>
-                <SelectContent>
-                  {Object.values(RequestStatus).map((status) => (
-                    <SelectItem key={status} value={status}>
-                      {status}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            )}
+          <Label>Payment Option</Label>
+          <Select onValueChange={setPaymentOption} value={paymentOption}>
+            <SelectTrigger>
+              <SelectValue placeholder="Select payment option" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="cash payment">Cash Payment</SelectItem>
+              <SelectItem value="online payment">Online Payment</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        {/* Handover Empty Cylinder */}
+        <div className="space-y-2">
+          <Label>Handover Empty Cylinder</Label>
+          <input
+            type="checkbox"
+            checked={handoverEmptyCylinder}
+            onChange={(e) => setHandoverEmptyCylinder(e.target.checked)}
+            className="w-4 h-4"
           />
-          {errors.status && (
-            <p className="text-red-500 text-sm">{errors.status.message}</p>
-          )}
+        </div>
+
+        {/* Price */}
+        <div className="space-y-2">
+          <Label>Total Price</Label>
+          <Input
+            type="text"
+            value={`LKR ${totalPrice.toLocaleString()}`}
+            readOnly
+            className="font-semibold bg-gray-100 cursor-not-allowed"
+          />
         </div>
       </div>
 
+      {/* Buttons */}
       <div className="flex justify-end space-x-2">
         <Button type="button" variant="outline" onClick={onCancel}>
-          {t('Cancel')}
+          Cancel
         </Button>
-        <Button type="submit">
-          {initialData ? t('Update Request') : t('Create Request')}
-        </Button>
+        <DialogClose asChild>
+          <Button type="submit">Submit</Button>
+        </DialogClose>
       </div>
     </form>
-  )
+  );
 }
-

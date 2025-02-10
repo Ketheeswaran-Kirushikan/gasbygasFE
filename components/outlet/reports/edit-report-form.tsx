@@ -9,7 +9,7 @@ import { DialogFooter } from '@/components/ui/dialog'
 interface EditReportFormProps {
   report: {
     id: string
-    type: 'stock' | 'deliveries' | 'users'
+    type: 'stock' | 'Gas Request' | 'users'
     startDate: string
     endDate: string
     generatedAt: string
@@ -31,14 +31,14 @@ export function EditReportForm({ report, onSave, onCancel }: EditReportFormProps
         <label className="text-sm font-medium">Report Type</label>
         <Select
           value={editedReport.type}
-          onValueChange={(value) => setEditedReport({ ...editedReport, type: value as 'stock' | 'deliveries' | 'users' })}
+          onValueChange={(value) => setEditedReport({ ...editedReport, type: value as 'stock' | 'Gas Request' | 'users' })}
         >
           <SelectTrigger>
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="stock">Stock Report</SelectItem>
-            <SelectItem value="deliveries">Deliveries Report</SelectItem>
+            <SelectItem value="deliveries">Gas Request Report</SelectItem>
             <SelectItem value="users">Users Report</SelectItem>
           </SelectContent>
         </Select>

@@ -1,0 +1,286 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 240 10% 3.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 240 10% 3.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 240 10% 3.9%;
+    --primary: 240 5.9% 10%;
+    --primary-foreground: 0 0% 98%;
+    --secondary: 240 4.8% 95.9%;
+    --secondary-foreground: 240 5.9% 10%;
+    --muted: 240 4.8% 95.9%;
+    --muted-foreground: 240 3.8% 46.1%;
+    --accent: 240 4.8% 95.9%;
+    --accent-foreground: 240 5.9% 10%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 240 5.9% 90%;
+    --input: 240 5.9% 90%;
+    --ring: 240 5.9% 10%;
+    --radius: 0.5rem;
+  }
+
+  .dark {
+    --background: 240 10% 3.9%;
+    --foreground: 0 0% 98%;
+    --card: 240 10% 3.9%;
+    --card-foreground: 0 0% 98%;
+    --popover: 240 10% 3.9%;
+    --popover-foreground: 0 0% 98%;
+    --primary: 0 0% 98%;
+    --primary-foreground: 240 5.9% 10%;
+    --secondary: 240 3.7% 15.9%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 240 3.7% 15.9%;
+    --muted-foreground: 240 5% 64.9%;
+    --accent: 240 3.7% 15.9%;
+    --accent-foreground: 0 0% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 240 3.7% 15.9%;
+    --input: 240 3.7% 15.9%;
+    --ring: 240 4.9% 83.9%;
+  }
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+/* Responsive typography */
+html {
+  font-size: 16px;
+}
+
+@media (max-width: 1024px) {
+  html {
+    font-size: 15px;
+  }
+}
+
+@media (max-width: 768px) {
+  html {
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 640px) {
+  html {
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 480px) {
+  html {
+    font-size: 12px;
+  }
+}
+
+/* Responsive spacing */
+.container {
+  @apply px-4 sm:px-6 lg:px-8;
+  padding: 1rem;
+}
+
+@media (min-width: 640px) {
+  .container {
+    padding: 1.5rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .container {
+    padding: 2rem;
+  }
+}
+
+/* Touch-friendly sizing for mobile and watch */
+@media (max-width: 640px) {
+  button,
+  [type="button"],
+  [type="reset"],
+  [type="submit"] {
+    min-height: 44px;
+    min-width: 44px;
+  }
+}
+
+/* Optimize for TV screens */
+@media (min-width: 1920px) {
+  .container {
+    max-width: 1800px;
+  }
+}
+
+/* Watch-specific styles */
+@media (max-width: 320px) {
+  html {
+    font-size: 12px;
+  }
+
+  .container {
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+  }
+}
+
+/* Component-specific styles */
+.btn,
+.search-box,
+.input,
+.checkbox {
+  font-size: 0.875rem;
+  padding: 0.5rem 1rem;
+}
+
+h1 {
+  font-size: 1.5rem;
+}
+
+h2 {
+  font-size: 1.25rem;
+}
+
+h3 {
+  font-size: 1.125rem;
+}
+
+p,
+label,
+span {
+  font-size: 1rem;
+}
+
+/* Component spacing */
+.card,
+.form-group,
+.table {
+  margin-bottom: 1.5rem;
+}
+
+.card-header,
+.card-body,
+.card-footer {
+  padding: 1rem;
+}
+
+@media (min-width: 640px) {
+  .card-header,
+  .card-body,
+  .card-footer {
+    padding: 1.5rem;
+  }
+}
+
+/* Grid and flexbox improvements */
+.grid {
+  gap: 1rem;
+}
+
+@media (min-width: 640px) {
+  .grid {
+    gap: 1.5rem;
+  }
+}
+
+.flex {
+  gap: 0.5rem;
+}
+
+@media (min-width: 640px) {
+  .flex {
+    gap: 1rem;
+  }
+}
+
+/* Form elements spacing */
+.form-group {
+  margin-bottom: 1rem;
+}
+
+@media (min-width: 640px) {
+  .form-group {
+    margin-bottom: 1.5rem;
+  }
+}
+
+/* Table improvements */
+.table th,
+.table td {
+  padding: 0.75rem;
+}
+
+@media (min-width: 640px) {
+  .table th,
+  .table td {
+    padding: 1rem;
+  }
+}
+
+/* Button group spacing */
+.btn-group {
+  gap: 0.5rem;
+}
+
+/* Sidebar improvements */
+.sidebar {
+  padding: 1rem;
+}
+
+@media (min-width: 1024px) {
+  .sidebar {
+    padding: 1.5rem;
+  }
+}
+
+/* Header improvements */
+.header {
+  padding: 0.75rem 1rem;
+}
+
+@media (min-width: 640px) {
+  .header {
+    padding: 1rem 1.5rem;
+  }
+}
+
+/* Dashboard name size in header */
+.dashboard-name {
+  font-size: 1rem;
+}
+
+@media (min-width: 768px) {
+  .dashboard-name {
+    font-size: 1.125rem;
+  }
+}
+
+/* Improved readability for small screens */
+@media (max-width: 480px) {
+  .hide-on-mobile {
+    display: none;
+  }
+
+  .full-width-on-mobile {
+    width: 100%;
+  }
+}
+

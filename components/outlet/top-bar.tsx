@@ -2,10 +2,9 @@
 
 import { useState } from 'react'
 import { Bell, Search } from 'lucide-react'
-import { useApp } from '@/contexts/app-context'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { useTranslation } from '@/hooks/use-translation'
+import { useTranslation } from '@/hooks/outlet/use-translation'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
@@ -19,11 +18,17 @@ import {
 } from '@/components/ui/dropdown-menu'
 
 export function TopBar() {
-  const { state } = useApp()
   const router = useRouter()
   const [unreadNotifications, setUnreadNotifications] = useState(0)
   const { t } = useTranslation()
   const [searchTerm, setSearchTerm] = useState('')
+
+  // Mocked user data to remove dependency on database-related logic
+  const user = {
+    name: 'Outlet 1',
+    email: 'kirushikiru@gmail.com',
+    profileUrl: '/placeholder.svg',
+  }
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault()
@@ -31,17 +36,13 @@ export function TopBar() {
   }
 
   const handleLogout = () => {
-    // In a real app, you would handle logout logic here
-    // For example, clearing auth tokens, etc.
     router.push('/login')
   }
-
-  const user = state.users[0]
 
   return (
     <div className="bg-white dark:bg-gray-800 h-16 border-b flex items-center justify-between px-6">
       <div className="flex items-center">
-        <img 
+        <img
           src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/logo-eoRYViBYc9hMaESVZpS1IwT42KGCxZ.png"
           alt="GAS BY GAS"
           className="h-8 w-auto mr-4"
@@ -72,7 +73,7 @@ export function TopBar() {
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" className="relative h-8 w-8 rounded-full">
               <Avatar className="h-8 w-8">
-                <AvatarImage src={user.profileUrl || '/placeholder.svg'} alt={user.name} />
+                <AvatarImage src={user.profileUrl} alt={user.name} />
                 <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
               </Avatar>
             </Button>
@@ -103,4 +104,3 @@ export function TopBar() {
     </div>
   )
 }
-

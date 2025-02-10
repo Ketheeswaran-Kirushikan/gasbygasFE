@@ -26,41 +26,36 @@ export function LoginModal({
 }) {
   const dispatch = useDispatch();
   const router = useRouter(); // Initialize Next.js router for navigation
+
   const [emailOrAdminName, setEmailOrAdminName] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false); // Loading state
 
   const handleLogin = async () => {
-    setIsLoading(true); // Start loading
+    setIsLoading(true);
     try {
-      const result = await dispatch(
+      // 1. Dispatch the login thunk
+      const actionResult = await dispatch(
         login({ emailOrAdminName, password })
-      ).unwrap();
-
-      // Extract userType and userId from the result
+      );
+      const result = actionResult.payload; // Directly access payload
+      if (!result?.user) throw new Error("User data missing!");
+      // 2. Extract userType and id
       const { userType, id } = result.user;
-
-      // Navigate based on userType
-      if (userType === "dispatch") {
-        router.push("/dispatch");
-      } else if (userType === "outlet") {
-        router.push(`/outlet/${id}`); // Navigate to dynamic outlet page
-      } else if (userType === "consumer") {
-        router.push(`/consumers/${id}`); // Navigate to dynamic consumer page
-      } else if (userType === "businessIndustry") {
-        router.push(`/businessIndustry/${id}`); // Navigate to dynamic business page
+      // 3. Redirect with userType as a query param
+    if (userType === "consumer" || userType === "businessIndustry") {
+        router.push(`/consumers/${id}?userType=${userType}`);
       } else {
-        toast.error("Invalid user type. Please contact support.");
+        throw new Error("Invalid user type. Please contact support.");
       }
-
-      // Reset form fields and close modal
+      // 4. Clear form fields and close the modal
       setEmailOrAdminName("");
       setPassword("");
       onClose();
     } catch (error: any) {
       toast.error(error.message || "Login failed. Please try again.");
     } finally {
-      setIsLoading(false); // End loading
+      setIsLoading(false);
     }
   };
 
@@ -126,7 +121,7 @@ export function LoginModal({
               <Button
                 className="w-full bg-[#D72323] hover:bg-[#D72323]/90 text-[#F5EDED] py-2 rounded-md"
                 onClick={handleLogin}
-                isDisabled={isLoading} // Disable button while loading
+                isDisabled={isLoading}
               >
                 {isLoading ? "Logging In..." : "Login"}
               </Button>

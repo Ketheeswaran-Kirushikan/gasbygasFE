@@ -1,8 +1,8 @@
 'use client'
 
 import { createContext, useContext, useReducer, ReactNode, useEffect } from 'react'
-import { Request, Stock, User, Settings, UserRole } from '@/types'
-import { translate, Language } from '@/lib/translations'
+import { Request, Stock, User, Settings, UserRole } from '@/Types/outlet/index'
+import { Language } from '@/lib/outlet/translations'
 
 interface AppState {
   requests: Request[]
@@ -84,4 +84,3 @@ export function useApp() {
   }
   return context
 }
-

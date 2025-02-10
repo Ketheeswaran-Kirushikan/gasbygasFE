@@ -1,4 +1,4 @@
-import { User, Request, Stock, Settings, UserRole, RequestStatus, RequestType, CylinderType } from '@/types'
+import { User, Request, Stock, Settings, UserRole, RequestStatus, RequestType, CylinderType } from '@/Types/outlet/index'
 
 // In-memory data store
 const data = {

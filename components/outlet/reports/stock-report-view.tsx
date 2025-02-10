@@ -1,9 +1,9 @@
 'use client'
 
-import { useApp } from '@/contexts/app-context'
+import { useApp } from '@/contexts/outlet/app-context'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { CylinderType } from '@/types'
+import { CylinderType } from '@/Types/outlet/index'
 
 interface StockReportViewProps {
   report: {

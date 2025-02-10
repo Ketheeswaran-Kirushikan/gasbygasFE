@@ -1,107 +1,109 @@
 'use client'
 
 import { useState } from 'react'
+import { useDispatch } from 'react-redux'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
+import { updateOutletThunk } from '@/app/Redux/features/outletSlice'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { useToast } from '@/components/ui/use-toast'
-import { useTranslation } from '@/hooks/use-translation'
+import { useParams } from 'next/navigation'
 
-const passwordSchema = z.object({
-  currentPassword: z.string().min(1, 'Current password is required'),
-  newPassword: z.string().min(8, 'Password must be at least 8 characters'),
-  confirmPassword: z.string().min(1, 'Confirm password is required'),
-}).refine((data) => data.newPassword === data.confirmPassword, {
-  message: "Passwords don't match",
-  path: ["confirmPassword"],
-});
+// Password validation schema
+const passwordSchema = z
+  .object({
+    currentPassword: z.string().min(1, 'Current password is required'),
+    newPassword: z.string().min(8, 'Password must be at least 8 characters'),
+    confirmPassword: z.string().min(1, 'Confirm password is required'),
+  })
+  .refine((data) => data.newPassword === data.confirmPassword, {
+    message: "Passwords don't match",
+    path: ['confirmPassword'],
+  })
 
-type PasswordFormData = z.infer<typeof passwordSchema>;
+type PasswordFormData = z.infer<typeof passwordSchema>
 
-export function SecuritySettings() {
-  const { t } = useTranslation()
-  const { toast } = useToast()
+interface Outlet {
+  outlet: {
+    _id: string
+  }
+}
+
+interface SecuritySettingsProps {
+  outlet: Outlet
+}
+
+export function SecuritySettings({ outlet }: SecuritySettingsProps) {
+  const dispatch = useDispatch()
+  const {id} = useParams();
   const [isLoading, setIsLoading] = useState(false)
 
   const {
     register,
     handleSubmit,
     formState: { errors },
-    reset
+    reset,
   } = useForm<PasswordFormData>({
-    resolver: zodResolver(passwordSchema)
+    resolver: zodResolver(passwordSchema),
   })
 
   const onSubmit = async (data: PasswordFormData) => {
     setIsLoading(true)
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000))
-    setIsLoading(false)
 
-    // In a real app, you would call an API to change the password here
-    console.log('Password change data:', data)
+    try {
+      // Create FormData object
+      const formData = new FormData()
+      formData.append('currentPassword', data.currentPassword)
+      formData.append('newPassword', data.newPassword)
 
-    // Show success notification
-    toast({
-      title: t('Password Changed'),
-      description: t('Your password has been successfully updated.'),
-      duration: 5000,
-    })
+      // Dispatch the updateOutletThunk with the formData
+      await dispatch(updateOutletThunk({ id, formData }))
 
-    // Reset form
-    reset()
+      reset() // Reset form fields
+    } catch (error) {
+
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle>{t('Security Settings')}</CardTitle>
+        <CardTitle>Security Settings</CardTitle>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="current-password">{t('Current Password')}</Label>
-            <Input
-              id="current-password"
-              type="password"
-              {...register('currentPassword')}
-            />
+            <Label htmlFor="current-password">Current Password</Label>
+            <Input id="current-password" type="password" {...register('currentPassword')} />
             {errors.currentPassword && (
-              <p className="text-sm text-red-500">{t(errors.currentPassword.message || '')}</p>
+              <p className="text-sm text-red-500">{errors.currentPassword.message}</p>
             )}
           </div>
           <div className="space-y-2">
-            <Label htmlFor="new-password">{t('New Password')}</Label>
-            <Input
-              id="new-password"
-              type="password"
-              {...register('newPassword')}
-            />
+            <Label htmlFor="new-password">New Password</Label>
+            <Input id="new-password" type="password" {...register('newPassword')} />
             {errors.newPassword && (
-              <p className="text-sm text-red-500">{t(errors.newPassword.message || '')}</p>
+              <p className="text-sm text-red-500">{errors.newPassword.message}</p>
             )}
           </div>
           <div className="space-y-2">
-            <Label htmlFor="confirm-password">{t('Confirm New Password')}</Label>
-            <Input
-              id="confirm-password"
-              type="password"
-              {...register('confirmPassword')}
-            />
+            <Label htmlFor="confirm-password">Confirm New Password</Label>
+            <Input id="confirm-password" type="password" {...register('confirmPassword')} />
             {errors.confirmPassword && (
-              <p className="text-sm text-red-500">{t(errors.confirmPassword.message || '')}</p>
+              <p className="text-sm text-red-500">{errors.confirmPassword.message}</p>
             )}
           </div>
           <Button type="submit" disabled={isLoading}>
-            {isLoading ? t('Changing Password...') : t('Change Password')}
+            {isLoading ? 'Changing Password...' : 'Change Password'}
           </Button>
         </form>
       </CardContent>
     </Card>
   )
 }
-

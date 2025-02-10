@@ -25,7 +25,6 @@ export const createUserThunk = createAsyncThunk(
   }
 );
 
-// Update User by ID
 export const updateUserThunk = createAsyncThunk(
   "users/updateUser",
   async ({ id, userData, imageFile }, { rejectWithValue }) => {
@@ -39,6 +38,7 @@ export const updateUserThunk = createAsyncThunk(
     }
   }
 );
+
 
 // Delete User by ID
 export const deleteUserThunk = createAsyncThunk(
