@@ -2,7 +2,7 @@ import axios from "axios";
 
 
 const API = axios.create({
-  baseURL: "https://gasbygasbe-production.up.railway.app/api/dispatch/gasrequest", // Ensure 'https://' is included
+  baseURL: "https://gasbygasbe-production.up.railway.app/api/gasrequest", // Ensure 'https://' is included
 });
 
 // Create Gas Request
