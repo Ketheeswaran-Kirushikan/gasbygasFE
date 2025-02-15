@@ -11,8 +11,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Search, Plus, Eye, Trash2, ChevronLeft, ChevronRight } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { UserForm } from "./UserForm";
-import { UserDetailsView } from "./UserView";
+import { UserForm } from "./userForm";
+import { UserDetailsView } from "./userview";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
