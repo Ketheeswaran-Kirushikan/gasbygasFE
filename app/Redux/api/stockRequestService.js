@@ -2,7 +2,7 @@ import axios from "axios";
 
 // Base URL for the backend
 const API = axios.create({
-  baseURL: "http://localhost:3004/api/stockrequest", // Update with your backend URL
+  baseURL: "http://gasbygasbe-production.up.railway.app/api/stockrequest", // Update with your backend URL
 });
 
 // Create Stock Request

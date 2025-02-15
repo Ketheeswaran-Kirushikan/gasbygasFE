@@ -1,9 +1,13 @@
 import axios from "axios";
 
 // ✅ Base API URL
+
 const API = axios.create({
-  baseURL: "http://localhost:3004/api/dispatch", // Update with your backend URL
-});
+    baseURL: "https://gasbygasbe-production.up.railway.app/api/dispatch", // Ensure 'https://' is included
+  });
+// const API = axios.create({
+//   baseURL: "http://localhost:3004/api/dispatch", // Update with your backend URL
+// });
 
 // ✅ Add Gas Stock to Existing Dispatch Admin
 export const addGasStock = async (dispatchId, gasStockData) => {

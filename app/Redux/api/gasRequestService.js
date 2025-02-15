@@ -1,8 +1,8 @@
 import axios from "axios";
 
-// Base URL for the backend
+
 const API = axios.create({
-  baseURL: "http://localhost:3004/api/gasrequest", // Update with your backend URL
+  baseURL: "https://gasbygasbe-production.up.railway.app/api/dispatch//gasrequest", // Ensure 'https://' is included
 });
 
 // Create Gas Request

@@ -2,7 +2,7 @@ import axios from "axios";
 
 // Base URL configuration for Axios
 const API = axios.create({
-  baseURL: "http://localhost:3004/api/outlet", // Replace with your backend URL
+  baseURL: "http://gasbygasbe-production.up.railway.app/api/outlet", // Replace with your backend URL
 });
 
 // Create Outlet
