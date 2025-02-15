@@ -101,7 +101,7 @@ export function StockRequestForm({
     e.preventDefault();
 
     if (formData.stockDetails.length === 0) {
-      toast.error("Please select at least one gas type.");
+      toast.error("Please  at least one gas type.");
       return;
     }
 
