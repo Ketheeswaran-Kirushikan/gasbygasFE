@@ -2,7 +2,7 @@ import axios from "axios";
 
 // Base URL for the backend
 const API = axios.create({
-  baseURL: "http://gasbygasbe-production.up.railway.app/api/gas", // Update with your backend URL
+  baseURL: "https://gasbygasbe-production.up.railway.app/api/gas", // Update with your backend URL
 });
 // Create Gas
 export const createGas = async (gasData) => {

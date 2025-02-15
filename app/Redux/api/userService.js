@@ -2,7 +2,7 @@ import axios from "axios";
 
 // Base URL configuration for Axios
 const API = axios.create({
-  baseURL: "http://gasbygasbe-production.up.railway.app/api/users", // Replace with your backend URL
+  baseURL: "https://gasbygasbe-production.up.railway.app/api/users", // Replace with your backend URL
 });
 
 // Create User

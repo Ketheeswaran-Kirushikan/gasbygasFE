@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const BASE_URL = "http://gasbygasbe-production.up.railway.app/api/notifications"; // Adjust based on your server
+const BASE_URL = "https://gasbygasbe-production.up.railway.app/api/notifications"; // Adjust based on your server
 
 // Get Notification by ID
 export const getNotificationById = async (id) => {
