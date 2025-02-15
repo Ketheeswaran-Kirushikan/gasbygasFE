@@ -93,15 +93,10 @@ export function Sidebar() {
     };
   }, [isOpen]);
 
-  const handleLogout = async () => {
-    try {
-      await dispatch(logout(token)).unwrap();
-      localStorage.removeItem("currentUserId");
-      localStorage.removeItem("authToken"); // Remove token from local storage
-      router.push("/"); // Navigate to the landing page
-    } catch (error) {
-      console.error("Logout failed:", error);
-    }
+  const handleLogout = () => {
+    localStorage.removeItem("currentUserId");
+    localStorage.removeItem("authToken");
+    router.push("/");
   };
 
   return (

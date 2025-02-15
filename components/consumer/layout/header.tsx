@@ -22,14 +22,14 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useState } from "react";
 
-export function Header({ outlet }) {
+export function Header({ user }) {
   const router = useRouter();
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
 
   // Ensure valid display name based on outlet data
-  const displayName = outlet?.outletName || "Outlet";
-  const email = outlet?.emailAddress || "";
-  const outletImage = outlet?.image || ""; // Ensure image handling
+  const displayName = user?.firstName ||user?.companyName;
+  const email = user?.emailAddress || "";
+  const outletImage = user?.image || ""; // Ensure image handling
 
   const handleLogout = () => {
     localStorage.removeItem("currentUserId");
