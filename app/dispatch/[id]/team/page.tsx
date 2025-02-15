@@ -1,9 +1,9 @@
 "use client"
 
 import { useState } from "react"
-import { Layout } from "@/components/distpach/layout"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/distpach/ui/card"
-import { Button } from "@/components/distpach/ui/button"
+import { Layout } from "@/components/dispatch/layout"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
 import {
   Table,
   TableBody,
@@ -11,9 +11,9 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/distpach/ui/table"
-import { Badge } from "@/components/distpach/ui/badge"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/distpach/ui/avatar"
+} from "@/components/ui/table"
+import { Badge } from "@/components/ui/badge"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 
 // Mock data for team members
 const initialTeam = [

@@ -1,12 +1,18 @@
 "use client";
+
+import { useEffect, useState } from "react";
 import { Inter } from "next/font/google";
 import "./globals.css"; // Landing page styles
-import { Navigation } from "@/components/navigation";
-import { Footer } from "@/components/footer";
 import { Provider } from "react-redux";
 import { store } from "@/app/Redux/store/store"; // Path to your Redux store
-import { ToastContainer } from "react-toastify"; // Import ToastContainer
-import "react-toastify/dist/ReactToastify.css"; // Import Toastify styles
+import dynamic from "next/dynamic";
+
+// Dynamically import ToastContainer to prevent hydration errors
+const ToastContainer = dynamic(
+  () => import("react-toastify").then((mod) => mod.ToastContainer),
+  { ssr: false }
+);
+
 const inter = Inter({ subsets: ["latin"] });
 
 export default function RootLayout({
@@ -14,29 +20,36 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  return (
-    <html lang="en">
-      <body className={`${inter.className} bg-[#F5EDED]`}>
-        {/* Wrap the entire layout with Redux Provider */}
-        <Provider store={store}>
-          {/* Navigation Bar */}
-                  {/* Toast Container for Toast Notifications */}
-                  <ToastContainer 
-            position="top-right" 
-            autoClose={5000} 
-            hideProgressBar={false} 
-            newestOnTop={false} 
-            closeOnClick 
-            rtl={false} 
-            pauseOnFocusLoss 
-            draggable 
-            pauseOnHover 
-            theme="light" 
-          />
+  const [mounted, setMounted] = useState(false);
 
-          {/* Main Content */}
-          <main className="">{children}</main>
-        </Provider>
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  return (
+    <html lang="en" suppressHydrationWarning>
+      <body className={`${inter.className} bg-[#F5EDED]`}>
+        {/* Wrap inside a hydration-safe check */}
+        {mounted && (
+          <Provider store={store}>
+            {/* Toast Container for Toast Notifications */}
+            <ToastContainer 
+              position="top-right" 
+              autoClose={5000} 
+              hideProgressBar={false} 
+              newestOnTop={false} 
+              closeOnClick 
+              rtl={false} 
+              pauseOnFocusLoss 
+              draggable 
+              pauseOnHover 
+              theme="light" 
+            />
+
+            {/* Main Content */}
+            <main>{children}</main>
+          </Provider>
+        )}
       </body>
     </html>
   );

@@ -1,4 +1,4 @@
-import { Layout } from "@/components/distpach/layout"
+import { Layout } from "@/components/dispatch/layout"
 
 export default function AlertsPage() {
   return (

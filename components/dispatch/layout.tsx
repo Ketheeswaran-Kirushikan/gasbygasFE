@@ -2,7 +2,9 @@ import type { ReactNode } from "react"
 import { DashboardSidebar } from "./sidebar"
 import { Header } from "./header"
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
-import { ThemeProvider } from "@/contexts/distpach/ThemeContext"
+import { ThemeProvider } from "@/contexts/dispatch/ThemeContext"
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 export function Layout({ children, unreadCount = 0 }: { children: ReactNode; unreadCount?: number }) {
   return (
@@ -14,6 +16,8 @@ export function Layout({ children, unreadCount = 0 }: { children: ReactNode; unr
             <DashboardSidebar />
             <main className="flex-1 overflow-x-hidden overflow-y-auto bg-background p-4 sm:p-6">
               <SidebarTrigger className="lg:hidden absolute top-20 sm:top-24 left-4" />
+                        {/* ✅ Global Toast Notifications */}
+          <ToastContainer position="top-right" autoClose={3000} />
               <div className="w-full h-full">{children}</div>
             </main>
           </div>

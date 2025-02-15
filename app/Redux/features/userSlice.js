@@ -47,13 +47,13 @@ export const deleteUserThunk = createAsyncThunk(
     try {
       const response = await deleteUser(id);
       toast.success("User deleted successfully!");
-      return response;
+      return id; // Return the deleted user's ID to remove from Redux state
     } catch (error) {
-      toast.error(error.response?.data?.error || "Failed to delete user");
       return rejectWithValue(error.response?.data?.error || "Failed to delete user");
     }
   }
 );
+
 
 // Get User by ID
 export const getUserByIdThunk = createAsyncThunk(
@@ -134,8 +134,8 @@ const userSlice = createSlice({
         state.error = null;
       })
       .addCase(deleteUserThunk.fulfilled, (state, action) => {
-        state.isLoading = false;
-        state.users = state.users.filter((user) => user.id !== action.meta.arg);
+        console.log("Deleted User ID:", action.payload); // Debugging Log
+        state.users = state.users.filter((user) => user._id !== action.payload);
       })
       .addCase(deleteUserThunk.rejected, (state, action) => {
         state.isLoading = false;

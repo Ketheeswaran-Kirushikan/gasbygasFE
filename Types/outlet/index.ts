@@ -90,7 +90,6 @@ export interface BusinessUser extends BaseUser {
   registrationNumber: string;
   businessCategory: BusinessCategory;
   certificationUrl: string;
-  contactPersonName: string;
 }
 
 export interface StaffUser extends BaseUser {

@@ -6,7 +6,8 @@ import {
   deleteGasRequestById,
   getGasRequestById,
   getAllGasRequestsByOutlet,
-  getAllGasRequestsByUser 
+  getAllGasRequestsByUser,
+  getAllGasRequestsByDispatch
 } from "../api/gasRequestService";
 
 // Async Thunks
@@ -25,18 +26,18 @@ export const createGasRequestThunk = createAsyncThunk(
 );
 
 export const updateGasRequestThunk = createAsyncThunk(
-    "gasRequests/updateGasRequest",
-    async ({ referenceNumber, formData }, { rejectWithValue }) => {
-      try {
-        const data = await updateGasRequestById(referenceNumber, formData);
-        toast.success("Gas request updated successfully!");
-        return data;
-      } catch (error) {
-        toast.error("Failed to update gas request.");
-        return rejectWithValue(error.response?.data || error.message);
-      }
+  "gasRequests/updateGasRequest",
+  async ({ referenceNumber, formData }, { rejectWithValue }) => {
+    try {
+      const data = await updateGasRequestById(referenceNumber, formData);
+      toast.success("Gas request updated successfully!");
+      return data;
+    } catch (error) {
+      toast.error("Failed to update gas request.");
+      return rejectWithValue(error.response?.data || error.message);
     }
-  );
+  }
+);
 
 export const deleteGasRequestThunk = createAsyncThunk(
   "gasRequests/deleteGasRequest",
@@ -78,16 +79,29 @@ export const getAllGasRequestsByOutletThunk = createAsyncThunk(
 
 // Thunk to fetch gas requests by user ID
 export const getAllGasRequestsByUserThunk = createAsyncThunk(
-    "gasRequests/getAllGasRequestsByUser",
-    async (userId, { rejectWithValue }) => {
-      try {
-        const data = await getAllGasRequestsByUser(userId);
-        return data;
-      } catch (error) {
-        return rejectWithValue(error.response?.data || error.message);
-      }
+  "gasRequests/getAllGasRequestsByUser",
+  async (userId, { rejectWithValue }) => {
+    try {
+      const data = await getAllGasRequestsByUser(userId);
+      return data;
+    } catch (error) {
+      return rejectWithValue(error.response?.data || error.message);
     }
-  );
+  }
+);
+
+// Thunk to fetch gas requests by user ID
+export const getAllGasRequestsByDispatchThunk = createAsyncThunk(
+  "gasRequests/getAllGasRequestsByDispatch",
+  async (id, { rejectWithValue }) => {
+    try {
+      const data = await getAllGasRequestsByDispatch(id);
+      return data;
+    } catch (error) {
+      return rejectWithValue(error.response?.data || error.message);
+    }
+  }
+);
 
 // Slice
 const gasRequestSlice = createSlice({
@@ -173,8 +187,8 @@ const gasRequestSlice = createSlice({
         state.loading = false;
       })
 
-       // Get all gas requests by user - pending
-       .addCase(getAllGasRequestsByUserThunk.pending, (state) => {
+      // Get all gas requests by user - pending
+      .addCase(getAllGasRequestsByUserThunk.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
@@ -185,6 +199,22 @@ const gasRequestSlice = createSlice({
       })
       // Get all gas requests by user - rejected
       .addCase(getAllGasRequestsByUserThunk.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+
+      // Get all gas requests by user - pending
+      .addCase(getAllGasRequestsByDispatchThunk.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      // Get all gas requests by user - fulfilled
+      .addCase(getAllGasRequestsByDispatchThunk.fulfilled, (state, action) => {
+        state.loading = false;
+        state.gasRequests = action.payload;
+      })
+      // Get all gas requests by user - rejected
+      .addCase(getAllGasRequestsByDispatchThunk.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
       });

@@ -1,11 +1,11 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Layout } from "@/components/distpach/layout"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/distpach/ui/card"
-import { Button } from "@/components/distpach/ui/button"
-import { Input } from "@/components/distpach/ui/input"
-import { Label } from "@/components/distpach/ui/label"
+import { Layout } from "@/components/dispatch/layout"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
 import {
   Table,
   TableBody,
@@ -13,15 +13,15 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/distpach/ui/table"
+} from "@/components/ui/table"
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/distpach/ui/dialog"
-import { useToast } from "@/components/distpach/ui/use-toast"
+} from "@/components/ui/dialog"
+import { useToast } from "@/components/ui/use-toast"
 import { Loader2, Search, Send } from 'lucide-react'
 
 interface Allocation {

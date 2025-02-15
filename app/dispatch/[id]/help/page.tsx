@@ -1,6 +1,6 @@
-import { Layout } from "@/components/distpach/layout"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/distpach/ui/card"
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/distpach/ui/accordion"
+import { Layout } from "@/components/dispatch/layout"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 
 export default function HelpPage() {
   return (

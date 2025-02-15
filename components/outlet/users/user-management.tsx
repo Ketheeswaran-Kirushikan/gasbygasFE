@@ -9,10 +9,22 @@ import {
 } from "@/app/Redux/features/userSlice";
 import { RootState, AppDispatch } from "@/app/Redux/store/store";
 
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Search, Plus, Eye, ChevronLeft, ChevronRight } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -35,11 +47,14 @@ const USERS_PER_PAGE = 5; // Pagination Limit
 
 export function UserManagement() {
   const dispatch: AppDispatch = useDispatch();
-  const { users, isLoading, error } = useSelector((state: RootState) => state.user);
+  const { users, isLoading, error } = useSelector(
+    (state: RootState) => state.user
+  );
 
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false);
-  const [isDetailsDialogOpen, setIsDetailsDialogOpen] = useState<boolean>(false);
+  const [isDetailsDialogOpen, setIsDetailsDialogOpen] =
+    useState<boolean>(false);
   const [viewingUser, setViewingUser] = useState<User | null>(null);
   const [currentPage, setCurrentPage] = useState<number>(1);
 
@@ -49,7 +64,8 @@ export function UserManagement() {
   }, [dispatch]);
 
   // Filter only consumers
-  const consumerUsers = users?.allUsers?.filter((user: User) => user.userType === "consumer") || [];
+  const consumerUsers =
+    users?.allUsers?.filter((user: User) => user.userType === "consumer") || [];
 
   // Filtered Users based on search
   const filteredUsers = consumerUsers.filter(
@@ -61,7 +77,10 @@ export function UserManagement() {
   // Pagination Logic
   const totalPages = Math.ceil(filteredUsers.length / USERS_PER_PAGE);
   const startIndex = (currentPage - 1) * USERS_PER_PAGE;
-  const paginatedUsers = filteredUsers.slice(startIndex, startIndex + USERS_PER_PAGE);
+  const paginatedUsers = filteredUsers.slice(
+    startIndex,
+    startIndex + USERS_PER_PAGE
+  );
 
   // Handle Adding a New User
   const handleAddUser = async (userData: User) => {
@@ -71,6 +90,26 @@ export function UserManagement() {
       dispatch(getAllUsersThunk()); // Refresh users after creation
     } catch (error) {
       toast.error("Failed to create user.");
+    }
+  };
+
+  // Handle Deleting a User
+  const handleDeleteUser = async (userId: string | undefined) => {
+    if (!userId) {
+      toast.error("Invalid user ID.");
+      console.error("Error: userId is undefined or missing");
+      return;
+    }
+
+    console.log("Attempting to delete user with ID:", userId); // Debugging Log
+
+    try {
+      await dispatch(deleteUserThunk(userId)).unwrap();
+      dispatch(getAllUsersThunk()); // Refresh users list after deletion
+      toast.success("User deleted successfully!");
+    } catch (error) {
+      console.error("Error deleting user:", error);
+      toast.error("Failed to delete user.");
     }
   };
 
@@ -88,8 +127,13 @@ export function UserManagement() {
   return (
     <div className="space-y-6 p-4 sm:p-6 md:p-8">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-semibold">User Management (Consumers Only)</h1>
-        <Button onClick={() => setIsDialogOpen(true)} className="bg-red-500 hover:bg-red-600">
+        <h1 className="text-2xl font-semibold">
+          User Management (Consumers Only)
+        </h1>
+        <Button
+          onClick={() => setIsDialogOpen(true)}
+          className="bg-red-500 hover:bg-red-600"
+        >
           <Plus className="h-4 w-4 mr-2" /> Add User
         </Button>
       </div>
@@ -129,28 +173,58 @@ export function UserManagement() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
+                    {console.log("Paginated Users:", paginatedUsers)}
                     {paginatedUsers.length > 0 ? (
-                      paginatedUsers.map((user: User) => (
-                        <TableRow key={user._id}>
-                          <TableCell>
-                            <Avatar className="w-10 h-10">
-                              <AvatarImage src={user.image || "/placeholder.svg"} alt={user.firstName} />
-                              <AvatarFallback>{user.firstName?.charAt(0) || "U"}</AvatarFallback>
-                            </Avatar>
-                          </TableCell>
-                          <TableCell>{user.firstName} {user.lastName}</TableCell>
-                          <TableCell>{user.email}</TableCell>
-                          <TableCell>{user.phoneNumber}</TableCell>
-                          <TableCell>
-                            <Button variant="ghost" size="icon" onClick={() => openDetailsDialog(user._id)}>
-                              <Eye className="h-4 w-4" />
-                            </Button>
-                          </TableCell>
-                        </TableRow>
-                      ))
+                      paginatedUsers.map((user: User) => {
+                        console.log("User Data:", user); // Debugging log
+                        return (
+                          <TableRow key={user._id}>
+                            <TableCell>
+                              <Avatar className="w-10 h-10">
+                                <AvatarImage
+                                  src={user.image || "/placeholder.svg"}
+                                  alt={user.firstName}
+                                />
+                                <AvatarFallback>
+                                  {user.firstName?.charAt(0) || "U"}
+                                </AvatarFallback>
+                              </Avatar>
+                            </TableCell>
+                            <TableCell>
+                              {user.firstName} {user.lastName}
+                            </TableCell>
+                            <TableCell>{user.email}</TableCell>
+                            <TableCell>{user.phoneNumber}</TableCell>
+                            <TableCell>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => openDetailsDialog(user._id)}
+                              >
+                                <Eye className="h-4 w-4" />
+                              </Button>
+                            </TableCell>
+                            <TableCell>
+                              <Button
+                                variant="destructive"
+                                size="icon"
+                                onClick={() => {
+                                  console.log(
+                                    "Deleting user with ID:",
+                                    user._id
+                                  ); // Debugging Log
+                                  handleDeleteUser(user._id);
+                                }}
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </TableCell>
+                          </TableRow>
+                        );
+                      })
                     ) : (
                       <TableRow>
-                        <TableCell colSpan={5} className="text-center py-4">
+                        <TableCell colSpan={6} className="text-center py-4">
                           No users found.
                         </TableCell>
                       </TableRow>
@@ -162,15 +236,21 @@ export function UserManagement() {
                 {totalPages > 1 && (
                   <div className="flex justify-between items-center mt-4">
                     <Button
-                      onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                      onClick={() =>
+                        setCurrentPage((prev) => Math.max(prev - 1, 1))
+                      }
                       disabled={currentPage === 1}
                       variant="outline"
                     >
                       <ChevronLeft className="h-5 w-5" /> Previous
                     </Button>
-                    <span className="text-gray-600">Page {currentPage} of {totalPages}</span>
+                    <span className="text-gray-600">
+                      Page {currentPage} of {totalPages}
+                    </span>
                     <Button
-                      onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+                      onClick={() =>
+                        setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+                      }
                       disabled={currentPage === totalPages}
                       variant="outline"
                     >
@@ -190,7 +270,11 @@ export function UserManagement() {
           <DialogHeader>
             <DialogTitle>Add User</DialogTitle>
           </DialogHeader>
-          <UserForm onSubmit={handleAddUser} onCancel={() => setIsDialogOpen(false)} initialData={null} />
+          <UserForm
+            onSubmit={handleAddUser}
+            onCancel={() => setIsDialogOpen(false)}
+            initialData={null}
+          />
         </DialogContent>
       </Dialog>
 

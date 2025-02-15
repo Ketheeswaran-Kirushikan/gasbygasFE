@@ -1,10 +1,10 @@
 "use client"
 
 import { useState } from "react"
-import { Layout } from "@/components/distpach/layout"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/distpach/ui/card"
-import { Button } from "@/components/distpach/ui/button"
-import { Calendar } from "@/components/distpach/ui/calendar"
+import { Layout } from "@/components/dispatch/layout"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { Calendar } from "@/components/ui/calendar"
 import {
   Table,
   TableBody,
@@ -12,8 +12,8 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/distpach/ui/table"
-import { Badge } from "@/components/distpach/ui/badge"
+} from "@/components/ui/table"
+import { Badge } from "@/components/ui/badge"
 
 // Mock data for scheduled deliveries
 const initialSchedule = [

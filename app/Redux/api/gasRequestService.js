@@ -24,6 +24,7 @@ export const updateGasRequestById = async (referenceNumber, formData) => {
 
 // Delete Gas Request
 export const deleteGasRequestById = async (id) => {
+  console.log(id)
   const response = await API.delete(`/delete/${id}`);
   return response.data;
 };
@@ -46,3 +47,9 @@ export const getAllGasRequestsByUser = async (userId) => {
     const response = await API.get(`/getall/user/${userId}`);
     return response.data;
   };
+
+  // Get all gas requests by user ID
+export const getAllGasRequestsByDispatch = async (id) => {
+  const response = await API.get(`/getall/dispatch/${id}`);
+  return response.data;
+};

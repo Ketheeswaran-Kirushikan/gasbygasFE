@@ -6,6 +6,7 @@ import gasRequestReducer from "../features/gasRequestSlice"; // gas request redu
 import gasReducer from "../features/gasSlice"; // gas
 import notificationReducer from "../features/notificationSlice"; //
 import stockReducer from "../features/stockSlice"; // stock
+import dispatchReducer from "../features/dispatchSlice"; // dispatch
 
 export const store = configureStore({
   reducer: {
@@ -16,5 +17,6 @@ export const store = configureStore({
     gas : gasReducer,
     notifications: notificationReducer, //
     stockRequest: stockReducer, // stock slice  //
+    dispatch: dispatchReducer, // dispatch slice  //
   },
 });

@@ -2,15 +2,14 @@
 
 import { useState, useEffect } from "react"
 import { useSearchParams } from "next/navigation"
-import { Layout } from "@/components/distpach/layout"
-import { Card, CardContent } from "@/components/distpach/ui/card"
-import { Button } from "@/components/distpach/ui/button"
-import { Input } from "@/components/distpach/ui/input"
-import { Label } from "@/components/distpach/ui/label"
-import { Switch } from "@/components/distpach/ui/switch"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/distpach/ui/tabs"
-import { useToast } from "@/components/distpach/ui/use-toast"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/distpach/ui/select"
+import { Layout } from "@/components/dispatch/layout"
+import { Card, CardContent } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Switch } from "@/components/ui/switch"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import {
   User,
   Bell,
@@ -25,14 +24,14 @@ import {
   Lock,
   LogOut,
 } from "lucide-react"
-import { useTheme } from "@/contexts/distpach/ThemeContext"
+import { useTheme } from "@/contexts/dispatch/ThemeContext"
 import { Eye, EyeOff, Shield, History, Key } from "lucide-react"
-import { Progress } from "@/components/distpach/ui/progress"
-import { Slider } from "@/components/distpach/ui/slider"
-import { Checkbox } from "@/components/distpach/ui/checkbox"
-import { RadioGroup, RadioGroupItem } from "@/components/distpach/ui/radio-group"
-import { Textarea } from "@/components/distpach/ui/textarea"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/distpach/ui/avatar"
+import { Progress } from "@/components/ui/progress"
+import { Slider } from "@/components/ui/slider"
+import { Checkbox } from "@/components/ui/checkbox"
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
+import { Textarea } from "@/components/ui/textarea"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import {
   Dialog,
   DialogContent,
@@ -41,8 +40,10 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/distpach/ui/dialog"
+} from "@/components/ui/dialog"
 import { Loader2 } from "lucide-react"
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 function calculatePasswordStrength(password: string): number {
   let strength = 0
@@ -58,7 +59,6 @@ export default function SettingsPage() {
   const { theme, setTheme } = useTheme()
   const [language, setLanguage] = useState("english")
   const [twoFactorEnabled, setTwoFactorEnabled] = useState(false)
-  const { toast } = useToast()
   const [showPassword, setShowPassword] = useState(false)
   const [passwordStrength, setPasswordStrength] = useState(0)
   const [isLoading, setIsLoading] = useState(false)
@@ -114,102 +114,79 @@ export default function SettingsPage() {
   const [isLogoutAllDevicesDialogOpen, setIsLogoutAllDevicesDialogOpen] = useState(false)
 
   const handleSaveProfile = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsLoading(true)
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1500))
-    setIsLoading(false)
-    toast({
-      title: "Profile Updated",
-      description: "Your profile information has been updated successfully.",
-    })
-  }
-
+    e.preventDefault();
+    setIsLoading(true);
+    await new Promise((resolve) => setTimeout(resolve, 1500));
+    setIsLoading(false);
+    toast.success("Your profile information has been updated successfully.");
+  };
+  
+  // Avatar Change
   const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
+    const file = e.target.files?.[0];
     if (file) {
-      const reader = new FileReader()
+      const reader = new FileReader();
       reader.onloadend = () => {
-        setProfile((prev) => ({ ...prev, avatar: reader.result as string }))
-      }
-      reader.readAsDataURL(file)
+        setProfile((prev) => ({ ...prev, avatar: reader.result as string }));
+      };
+      reader.readAsDataURL(file);
+      toast.success("Profile picture updated successfully.");
+    } else {
+      toast.warn("No file selected. Please choose an image.");
     }
-  }
-
+  };
+  
+  // Password Change
   const handleChangePassword = async (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
     if (passwordForm.newPassword !== passwordForm.confirmPassword) {
-      toast({
-        title: "Password Mismatch",
-        description: "New password and confirm password do not match.",
-        variant: "destructive",
-      })
-      return
+      toast.error("New password and confirm password do not match.");
+      return;
     }
-    setIsLoading(true)
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1500))
-    setIsLoading(false)
-    setIsChangePasswordDialogOpen(false)
-    setPasswordForm({
-      currentPassword: "",
-      newPassword: "",
-      confirmPassword: "",
-    })
-    toast({
-      title: "Password Changed",
-      description: "Your password has been successfully updated.",
-    })
-  }
-
+    setIsLoading(true);
+    await new Promise((resolve) => setTimeout(resolve, 1500));
+    setIsLoading(false);
+    setIsChangePasswordDialogOpen(false);
+    setPasswordForm({ currentPassword: "", newPassword: "", confirmPassword: "" });
+    toast.success("Your password has been successfully updated.");
+  };
+  
+  // Logout All Devices
   const handleLogoutAllDevices = async () => {
-    setIsLoading(true)
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1500))
-    setIsLoading(false)
-    setIsLogoutAllDevicesDialogOpen(false)
-    toast({
-      title: "Logged Out",
-      description: "You have been logged out of all devices.",
-    })
-  }
-
+    setIsLoading(true);
+    await new Promise((resolve) => setTimeout(resolve, 1500));
+    setIsLoading(false);
+    setIsLogoutAllDevicesDialogOpen(false);
+    toast.info("You have been logged out of all devices.");
+  };
+  
+  // Account Deletion
   const handleDeleteAccount = async () => {
-    setIsLoading(true)
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1500))
-    setIsLoading(false)
-    setIsDeleteAccountDialogOpen(false)
-    toast({
-      title: "Account Deleted",
-      description: "Your account has been permanently deleted.",
-      variant: "destructive",
-    })
-  }
-
-  const handleNotificationChange = (key: string, value: any) => {
-    setNotificationSettings((prev) => ({ ...prev, [key]: value }))
-  }
-
-  const handleCategoryChange = (category: string, checked: boolean) => {
-    setNotificationSettings((prev) => ({
-      ...prev,
-      categories: { ...prev.categories, [category]: checked },
-    }))
-  }
-
+    setIsLoading(true);
+    await new Promise((resolve) => setTimeout(resolve, 1500));
+    setIsLoading(false);
+    setIsDeleteAccountDialogOpen(false);
+    toast.error("Your account has been permanently deleted.");
+  };
+  
+  // Notification Settings Update
   const handleSaveNotifications = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsLoading(true)
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1500))
-    setIsLoading(false)
-    toast({
-      title: "Notification Preferences Saved",
-      description: "Your notification settings have been updated successfully.",
-    })
-  }
-
+    e.preventDefault();
+    setIsLoading(true);
+    await new Promise((resolve) => setTimeout(resolve, 1500));
+    setIsLoading(false);
+    toast.success("Your notification settings have been updated successfully.");
+  };
+  
+  // Handle Errors and Empty Input
+  const handleEmptyField = (field: string) => {
+    toast.warn(`${field} cannot be empty. Please fill it in.`);
+  };
+  
+  // Handle General Errors
+  const handleGeneralError = (error: string) => {
+    toast.error(`An error occurred: ${error}`);
+  };
   const searchParams = useSearchParams()
 
   useEffect(() => {
