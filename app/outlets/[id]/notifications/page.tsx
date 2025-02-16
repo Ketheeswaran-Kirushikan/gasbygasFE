@@ -22,38 +22,40 @@ type Notification = {
 export default function NotificationsPage() {
   const dispatch: AppDispatch = useDispatch()
   const { t } = useTranslation()
-  const { id: userId } = useParams(); // ✅ Get userId from URL
+  const { id: userId } = useParams()
 
-  const { notifications, loading } = useSelector((state: RootState) => state.notifications);
+  const { notifications, loading } = useSelector((state: RootState) => state.notifications)
   const [activeTab, setActiveTab] = useState<'all' | 'unread' | 'read'>('all')
 
+  // ✅ Fetch Notifications When User ID Changes
   useEffect(() => {
     if (userId) {
-      dispatch(fetchNotificationsByUserIdThunk(userId)); // ✅ Fetch user notifications
+      dispatch(fetchNotificationsByUserIdThunk(userId))
     }
-  }, [dispatch, userId]);
+  }, [dispatch, userId])
 
-  const filteredNotifications = notifications?.filter(notif => {
-    if (activeTab === 'all') return true
-    if (activeTab === 'unread') return !notif.isRead
-    if (activeTab === 'read') return notif.isRead
-    return true
-  }) || [];
+  // ✅ Filter Notifications Per Tab
+  const filteredNotifications = {
+    all: notifications,
+    unread: notifications?.filter(notif => !notif.isRead),
+    read: notifications?.filter(notif => notif.isRead),
+  }
 
-  // ✅ Mark a single notification as read
+  // ✅ Mark a Single Notification as Read
   const markAsRead = (id: string) => {
-    dispatch(updateNotificationThunk({ id, isRead: true }));
+    dispatch(updateNotificationThunk({ id, isRead: true }))
   }
 
-  // ✅ Mark all unread notifications as read
+  // ✅ Mark All Unread Notifications as Read
   const markAllAsRead = () => {
-    notifications.forEach(notif => {
-      if (!notif.isRead) {
-        dispatch(updateNotificationThunk({ id: notif._id, isRead: true }));
-      }
-    });
+    const unreadNotifications = notifications.filter(notif => !notif.isRead)
+
+    unreadNotifications.forEach((notif) => {
+      dispatch(updateNotificationThunk({ id: notif._id, isRead: true }))
+    })
   }
 
+  // ✅ Get Icon Based on Notification Type
   const getIcon = (type: Notification['type']) => {
     switch (type) {
       case 'delivery':
@@ -71,11 +73,13 @@ export default function NotificationsPage() {
 
   return (
     <div className="p-6 space-y-6">
+      {/* ✅ Header Section */}
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-semibold">{t('Notifications')}</h1>
         <Button onClick={markAllAsRead}>{t('Mark all as read')}</Button>
       </div>
       
+      {/* ✅ Notification Tabs */}
       <Card>
         <CardHeader>
           <CardTitle>{t('Your Notifications')}</CardTitle>
@@ -90,15 +94,11 @@ export default function NotificationsPage() {
                 <TabsTrigger value="unread">{t('Unread')}</TabsTrigger>
                 <TabsTrigger value="read">{t('Read')}</TabsTrigger>
               </TabsList>
-              <TabsContent value="all">
-                {renderNotifications(filteredNotifications)}
-              </TabsContent>
-              <TabsContent value="unread">
-                {renderNotifications(filteredNotifications)}
-              </TabsContent>
-              <TabsContent value="read">
-                {renderNotifications(filteredNotifications)}
-              </TabsContent>
+
+              {/* ✅ Render Notifications for Selected Tab */}
+              <TabsContent value="all">{renderNotifications(filteredNotifications.all)}</TabsContent>
+              <TabsContent value="unread">{renderNotifications(filteredNotifications.unread)}</TabsContent>
+              <TabsContent value="read">{renderNotifications(filteredNotifications.read)}</TabsContent>
             </Tabs>
           )}
         </CardContent>
@@ -106,10 +106,12 @@ export default function NotificationsPage() {
     </div>
   )
 
+  // ✅ Function to Render Notifications
   function renderNotifications(notifs: Notification[]) {
-    if (notifs.length === 0) {
+    if (!notifs || notifs.length === 0) {
       return <p className="text-center text-gray-500">{t('No notifications')}</p>
     }
+
     return notifs.map((notification) => (
       <div
         key={notification._id}

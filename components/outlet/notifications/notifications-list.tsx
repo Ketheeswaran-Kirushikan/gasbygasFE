@@ -79,7 +79,7 @@ export function NotificationsList({ onUnreadCountChange }: NotificationsListProp
     if (notifs.length === 0) {
       return <p className="text-center text-gray-500">No notifications in this category.</p>
     }
-    return notifs.map((notification) => (
+    return notifs?.map((notification) => (
       <Card
         key={notification.id}
         className={`p-4 ${notification.read ? 'bg-gray-50' : 'bg-white'}`}

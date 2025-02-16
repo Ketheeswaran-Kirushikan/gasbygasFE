@@ -9,6 +9,7 @@ export const login = createAsyncThunk(
     try {
       const response = await loginUser(emailOrAdminName, password);
       toast.success("Login successful");
+      console.log(response)
       return response;
     } catch (error) {
       toast.error(error.message);

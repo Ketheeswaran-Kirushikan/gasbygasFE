@@ -114,7 +114,7 @@ export function DeliveryManagement() {
   };
 
   const filteredRequests = Array.isArray(gasRequests)
-    ? gasRequests.filter((request) =>
+    ? gasRequests?.filter((request) =>
         request.referenceNumber?.toLowerCase()?.includes(searchTerm.toLowerCase())
       )
     : [];

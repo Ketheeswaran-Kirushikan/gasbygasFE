@@ -24,8 +24,8 @@ export function IncomingRequests({ gasRequests }) {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {latestRequests.length > 0 ? (
-              latestRequests.map((request) => (
+            {latestRequests?.length > 0 ? (
+              latestRequests?.map((request) => (
                 <TableRow key={request._id}>
                   <TableCell>{request.referenceNumber}</TableCell>
                   <TableCell>{request.gasType}</TableCell>

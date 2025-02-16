@@ -20,32 +20,33 @@ import { Button } from "@/components/ui/button";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
+// ✅ Sidebar Navigation Items
 const navItems = [
   { icon: Home, label: "Dashboard", path: "" },
-  { icon: Package, label: "Stock Management", path: "stock/stock-management" },
-  { icon: Truck, label: "Gas Request", path: "deliveries/delivery-management" },
-  { icon: Users, label: "User Management", path: "users/user-management" },
-  { icon: FileText, label: "Reports", path: "reports/report-generation" },
-  { icon: BarChart, label: "Analytics", path: "analytics/analytics-dashboard" },
-  { icon: Bell, label: "Notifications", path: "notifications" }, // ✅ Moved Notifications here
-  { icon: Settings, label: "Settings", path: "settings" }, // ✅ Moved Settings here
+  { icon: Package, label: "Stock Management", path: "stock" },
+  { icon: Truck, label: "Gas Request", path: "deliveries" },
+  { icon: Users, label: "User Management", path: "users" },
+  { icon: FileText, label: "Reports", path: "reports" },
+  { icon: BarChart, label: "Analytics", path: "analytics" },
+  { icon: Bell, label: "Notifications", path: "notifications" },
+  { icon: Settings, label: "Settings", path: "settings" },
 ];
 
 export function Sidebar({ outlet }) {
   const { t } = useTranslation();
   const pathname = usePathname();
   const router = useRouter();
-  // Extract outlet ID from the pathname
-  const outletId = pathname.split("/")[2];
-
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
+
+  // ✅ Extract outlet ID safely
+  const outletId = pathname?.split("/")?.[2] ?? "";
 
   const handleLogout = () => {
     setIsLogoutModalOpen(false);
     toast.success("Successfully logged out!", { position: "top-right", autoClose: 3000 });
 
     setTimeout(() => {
-      router.push("/logout"); // Redirect after a short delay
+      router.push("/logout"); // ✅ Redirect after a short delay
     }, 1500);
   };
 
@@ -53,7 +54,7 @@ export function Sidebar({ outlet }) {
     <div className="w-64 bg-[#1C2434] h-full text-gray-300 relative">
       <ToastContainer position="top-right" autoClose={3000} />
 
-      {/* Logo & Title */}
+      {/* ✅ Sidebar Header */}
       <div className="flex items-center justify-between h-16 px-6 border-b border-gray-700">
         <div className="flex items-center">
           <img
@@ -65,23 +66,27 @@ export function Sidebar({ outlet }) {
         </div>
       </div>
 
-      {/* Navigation Links */}
+      {/* ✅ Navigation Links */}
       <nav className="mt-6 space-y-1">
-        {navItems.map((item) => (
-          <Link
-            key={item.path}
-            href={`/outlets/${outletId}/${item.path}`}
-            className={`flex items-center px-6 py-3 text-gray-300 hover:bg-gray-800 transition ${
-              pathname === `/outlets/${outletId}/${item.path}` ? "bg-gray-800 text-white" : ""
-            }`}
-          >
-            <item.icon className="h-5 w-5 mr-3" />
-            {t(item.label)}
-          </Link>
-        ))}
+        {navItems.map((item) => {
+          const fullPath = `/outlets/${outletId}/${item.path}`;
+
+          return (
+            <Link
+              key={item.path}
+              href={fullPath}
+              className={`flex items-center px-6 py-3 text-gray-300 hover:bg-gray-800 transition ${
+                pathname.startsWith(fullPath) ? "bg-gray-800 text-white" : ""
+              }`}
+            >
+              <item.icon className="h-5 w-5 mr-3" />
+              {t(item.label)}
+            </Link>
+          );
+        })}
       </nav>
 
-      {/* Logout Button */}
+      {/* ✅ Logout Button */}
       <button
         onClick={() => setIsLogoutModalOpen(true)}
         className="absolute bottom-0 w-full flex items-center px-6 py-3 text-gray-300 hover:bg-gray-800 transition focus:outline-none"
@@ -90,7 +95,7 @@ export function Sidebar({ outlet }) {
         {t("Logout")}
       </button>
 
-      {/* Logout Confirmation Modal */}
+      {/* ✅ Logout Confirmation Modal */}
       <Dialog open={isLogoutModalOpen} onOpenChange={setIsLogoutModalOpen}>
         <DialogContent>
           <DialogHeader>
