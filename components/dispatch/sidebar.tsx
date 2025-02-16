@@ -54,9 +54,9 @@ export function DashboardSidebar() {
     { icon: BarChart, label: "Analytics", href: `${dispatchBasePath}/analytics` },
     { icon: FileText, label: "Reports", href: `${dispatchBasePath}/reports` },
     { icon: UserCog, label: "User Management", href: `${dispatchBasePath}/user-management` },
+    { icon: UserCog, label: "Outlet Management", href: `${dispatchBasePath}/outlet` },
     { icon: Share2, label: "Allocation", href: `${dispatchBasePath}/allocation` },
     { icon: Bell, label: "Notifications", href: `${dispatchBasePath}/notifications` },
-    { icon: Settings, label: "Settings", href: `${dispatchBasePath}/settings` },
   ];
 
   // Logout handler

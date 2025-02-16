@@ -3,6 +3,7 @@ import axios from "axios";
 // Base URL configuration for Axios
 const API = axios.create({
   baseURL: "https://gasbygasbe-production.up.railway.app/api/outlet", // Replace with your backend URL
+  
 });
 
 // Create Outlet
@@ -10,6 +11,8 @@ export const createOutlet = async (formData) => {
   const response = await API.post("/create", formData, {
     headers: { "Content-Type": "multipart/form-data" },
   });
+  console.log(response)
+
   return response.data;
 };
 
