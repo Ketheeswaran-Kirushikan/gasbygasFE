@@ -25,7 +25,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Search, Plus, Eye, ChevronLeft, ChevronRight } from "lucide-react";
+import { Search, Plus, Eye, ChevronLeft, ChevronRight,Trash2 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { UserForm } from "./user-form";
